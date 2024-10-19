@@ -1,16 +1,18 @@
 #!/bin/bash
 
-nvim=$HOME/.config/nvim
 dotfiles=$HOME/Workspaces/personal/dotfiles
+nvim=$HOME/.config/nvim
 notes=$HOME/Workspaces/personal/notes
 music=$HOME/Workspaces/personal/music
+cv=$HOME/Workspaces/personal/cv
 pass=$HOME/.password-store
 
 projects=(
-    "$nvim"
     "$dotfiles"
+    "$nvim"
     "$notes"
     "$music"
+    "$cv"
     "$pass"
 )
 
