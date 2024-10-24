@@ -1,6 +1,6 @@
 
 $current = git rev-parse --abbrev-ref HEAD
-$target = $args[0] ?? "main"
+$target = $args[0] ?? "master"
 
 git checkout $target
 git pull origin $target
