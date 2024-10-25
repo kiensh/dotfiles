@@ -2,6 +2,8 @@
 # zsh-completions
 [ ! -d "$ZSH/zsh-completions" ] && git clone https://github.com/zsh-users/zsh-completions $ZSH/zsh-completions
 fpath=($ZSH/zsh-completions $fpath)
+# case-insensitive completion
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 
 # zsh-autosuggestions
 [ ! -d "$ZSH/zsh-autosuggestions" ] && git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH/zsh-autosuggestions
