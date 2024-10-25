@@ -39,15 +39,15 @@ map x cut
 # This command is called when current file is not a directory. You may want to
 # use either file extensions and/or mime types here. Below uses an editor for
 # text files and a file opener for the rest.
-cmd open &{{
-    case $(file --mime-type -Lb $f) in
-        text/*) lf -remote "send $id \$$EDITOR \$fx";;
-        # application/*) lf -remote "send $id \$\$fx";;
-        *) for f in $fx; do $OPENER $f > /dev/null 2> /dev/null & done;;
+cmd my-open &{{
+    case $(echo "$HOME") in
+        # /home/*) ;;
+        /Users/*) open -R $f;;
+        *) echo "$f";;
     esac
 }}
 # dedicated keys for file opener actions
-map o open
+map o my-open
 
 # mkdir command. See wiki if you want it to select created dir
 map d :push %mkdir<space>-p<space>
@@ -111,7 +111,8 @@ cmd tar ${{
 
 # compress current file or selected files with zip
 cmd zip ${{
-    zip -rv $f.zip $f
+    name=${1-$(basename $f)}
+    zip -rv $name.zip $name
 }}
 map zz push :zip<space>
 
