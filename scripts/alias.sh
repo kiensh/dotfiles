@@ -6,10 +6,14 @@ export LS_COLORS="di=1;34:ln=1;36:so=1;35:pi=1;33:ex=1;32:bd=1;33:cd=1;33:su=37;
 export LSCOLORS="Gxfxcxdxbxegedabagacad"
 export LSCOLORS="ExGxFxDxCxDxDxhbadbxbx"
 
-alias ls="ls -G"
-alias la="ls -lAh"
-alias ll="ls -lh"
-alias grep="grep --color=auto"
+alias grep='grep --color=auto'
+alias ls='ls --color=always'
+alias ld='ls -l | grep "^d" | grep -v "total"'
+alias lf='ls -lp --color=always | grep -v "^d" | grep -v "total"'
+alias lh='ls -ld .?*'
+alias lA='ls -lA | grep "^d" | grep -v "total" && ls -la | grep -v "^d"'
+# alias ll='ls -l'
+# alias lt='ls -ltr'
 
 alias v="nvim"
 
