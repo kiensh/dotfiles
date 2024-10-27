@@ -65,7 +65,8 @@ keymap = [
 	{ on = "y",         run = "yank",                        desc = "Yank selected files (copy)" },
 	{ on = "x",         run = "yank --cut",                  desc = "Yank selected files (cut)" },
 	{ on = "p",         run = "paste",                       desc = "Paste yanked files" },
-	{ on = "P",         run = "paste --force",               desc = "Paste yanked files (overwrite if the destination exists)" },
+	# { on = "P",         run = "paste --force",               desc = "Paste yanked files (overwrite if the destination exists)" },
+	{ on = "P",         run = "shell --interactive 'eza --no-quotes *.m* | mpv --playlist=-'", desc = "Play Video with MPV" },
 	{ on = "-",         run = "link",                        desc = "Symlink the absolute path of yanked files" },
 	{ on = "_",         run = "link --relative",             desc = "Symlink the relative path of yanked files" },
 	{ on = "<C-->",     run = "hardlink",                    desc = "Hardlink yanked files" },
@@ -126,7 +127,8 @@ keymap = [
 	{ on = [ "g", "h" ],       run = "cd ~",             desc = "Go to the home directory" },
 	{ on = [ "g", "c" ],       run = "cd ~/.config",     desc = "Go to the config directory" },
 	{ on = [ "g", "d" ],       run = "cd ~/Downloads",   desc = "Go to the downloads directory" },
-	{ on = [ "g", "D" ],       run = "cd ~/Documents",   desc = "Go to the downloads directory" },
+	{ on = [ "g", "D" ],       run = "cd ~/Documents",   desc = "Go to the documents directory" },
+	{ on = [ "g", "w" ],       run = "cd ~/Workspaces",   desc = "Go to the workspaces directory" },
 	{ on = [ "g", "<Space>" ], run = "cd --interactive", desc = "Go to a directory interactively" },
 
 	# Tabs
