@@ -7,6 +7,7 @@ Set-Alias -Name e -Value C:\Windows\explorer.exe
 Set-Alias -Name v -Value nvim.exe
 Set-Alias -Name echo -Value Write-Output
 Set-Alias -Name which -Value Get-Command
+Set-Alias -Name clear -Value Clear-Host
 
 Import-Module PSReadLine
 Set-PSReadLineOption -PredictionSource HistoryAndPlugin -HistorySearchCursorMovesToEnd
