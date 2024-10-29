@@ -150,6 +150,9 @@ keymap = [
   { on = "{", run = "tab_swap -1", desc = "Swap current tab with previous tab" },
   { on = "}", run = "tab_swap 1",  desc = "Swap current tab with next tab" },
 
+  # Zip files
+  { on = [ "z", "z" ], run = "shell --interactive ''", desc = "Compress to zip file" },
+
   # Tasks
   { on = "w", run = "tasks_show", desc = "Show task manager" },
 
