@@ -189,7 +189,7 @@ cmd info &{{
 cmd get-size ${{
     echo "Getting Size... '$(dirname $f)'"
     # df -h | grep "Use\|home\|media"
-    lines=${1-20}
+    lines=$(tput lines)
     du -a --si . | sort -h | tail -n $lines
     echo "Dir: '$(dirname $f)'"
     df -H ~ .

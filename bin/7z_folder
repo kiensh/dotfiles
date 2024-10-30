@@ -3,8 +3,14 @@
 if [ ${#@} -lt 2 ]; then
   >&2 echo "Error: Missing arguments"
   >&2 echo "Pattern: $(basename "$0") <extension> <folder1> <folder2> ..."
-  >&2 echo "Extension: 7z, zip, gzip, bzip2, lzip or tar"
   exit 1
+fi
+
+exts=(7z zip gzip bzip2 lzip tar)
+if [[ ! " ${exts[@]} " =~ " $1 " ]]; then
+  >&2 echo "Error: Invalid extension";
+  >&2 echo "Extension: ${exts[@]}"
+  exit 1;
 fi
 
 ext=$1
