@@ -7,6 +7,7 @@ export BROWSER="firefox"
 export ZDOTDIR="$HOME"
 export ZSH="$HOME/.zsh"
 mkdir -p "$ZSH"
+PATH+=":$HOME/.local/bin"
 
 # dotnet
 export DOTNET_ROOT="$HOME/dotnet"
@@ -33,7 +34,9 @@ export PATH="$PATH:$HOME/rclone"
 export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 
 # flutter
-export PATH="$PATH:$HOME/.pub-cache/bin"
+if [ $(command -v flutter) ]; then
+    export PATH="$PATH:$HOME/.pub-cache/bin"
+fi
 
 # jdk
 export JAVA_HOME="/Library/Java/JavaVirtualMachines/oracle-jdk-21.0.3"

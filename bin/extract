@@ -1,0 +1,13 @@
+#!/bin/bash
+
+for f in "$@"; do
+  case "$f" in
+    *.tar.bz|*.tar.bz2|*.tbz|*.tbz2) tar xjvf "$f";;
+    *.tar.gz|*.tgz) tar xzvf "$f";;
+    *.tar.xz|*.txz) tar xJvf "$f";;
+    *.tar.zst|*.zst) tar xaf "$f";;
+    *.7z|*.zip) 7z x -o${f%.*} "$f";;
+    *.rar) unrar x -o- "$f";;
+  esac
+done
+

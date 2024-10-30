@@ -65,8 +65,7 @@ keymap = [
   { on = "y",         run = "yank",                        desc = "Yank selected files (copy)" },
   { on = "x",         run = "yank --cut",                  desc = "Yank selected files (cut)" },
   { on = "p",         run = "paste",                       desc = "Paste yanked files" },
-  # { on = "P",         run = "paste --force",               desc = "Paste yanked files (overwrite if the destination exists)" },
-  { on = "P",         run = "shell --interactive 'eza --no-quotes *.m* | mpv --playlist=-'", desc = "Play Video with MPV" },
+  { on = "P",         run = "paste --force",               desc = "Paste yanked files (overwrite if the destination exists)" },
   { on = "-",         run = "link",                        desc = "Symlink the absolute path of yanked files" },
   { on = "_",         run = "link --relative",             desc = "Symlink the relative path of yanked files" },
   { on = "<C-->",     run = "hardlink",                    desc = "Hardlink yanked files" },
@@ -133,6 +132,7 @@ keymap = [
 
   # Tabs
   { on = "t", run = "tab_create --current", desc = "Create a new tab with CWD" },
+  { on = "T", run = "tab_close", desc = "Create a new tab with CWD" },
 
   { on = "1", run = "tab_switch 0", desc = "Switch to the first tab" },
   { on = "2", run = "tab_switch 1", desc = "Switch to the second tab" },
@@ -151,7 +151,9 @@ keymap = [
   { on = "}", run = "tab_swap 1",  desc = "Swap current tab with next tab" },
 
   # Zip files
-  { on = [ "z", "z" ], run = "shell --interactive ''", desc = "Compress to zip file" },
+  { on = [ "z", "z" ], run = "shell --interactive '7z_folder zip \"$@\"'", desc = "Compress to zip file" },
+  { on = [ "z", "7" ], run = "shell --interactive '7z_folder 7z \"$@\"'", desc = "Compress to 7z file" },
+  { on = [ "z", "x" ], run = "shell --interactive 'extract \"$@\"'", desc = "Extract file" },
 
   # Tasks
   { on = "w", run = "tasks_show", desc = "Show task manager" },
@@ -167,6 +169,7 @@ keymap = [
   { on = "<Esc>", run = "close", desc = "Close task manager" },
   { on = "<C-[>", run = "close", desc = "Close task manager" },
   { on = "<C-c>", run = "close", desc = "Close task manager" },
+  { on = "q",     run = "close", desc = "Close task manager" },
   { on = "w",     run = "close", desc = "Close task manager" },
 
   { on = "k", run = "arrow -1", desc = "Move cursor up" },
@@ -189,6 +192,7 @@ keymap = [
   { on = "<Esc>",   run = "close",          desc = "Cancel selection" },
   { on = "<C-[>",   run = "close",          desc = "Cancel selection" },
   { on = "<C-c>",   run = "close",          desc = "Cancel selection" },
+  { on = "q",       run = "close",          desc = "Cancel selection" },
   { on = "<Enter>", run = "close --submit", desc = "Submit the selection" },
 
   { on = "k", run = "arrow -1", desc = "Move cursor up" },

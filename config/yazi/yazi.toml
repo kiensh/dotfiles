@@ -47,7 +47,8 @@ reveal = [
   { run = '''exiftool "$1"; echo "Press enter to exit"; read _''', block = true, desc = "Show EXIF", for = "unix" },
 ]
 extract = [
-  { run = 'ya pub extract --list "$@"', desc = "Extract here", for = "unix" },
+  # { run = 'ya pub extract --list "$@"', desc = "Extract here", for = "unix" },
+  { run = 'extract "$@"', desc = "Extract here", for = "unix" },
   { run = 'ya pub extract --list %*',   desc = "Extract here", for = "windows" },
 ]
 play = [
@@ -55,11 +56,14 @@ play = [
   { run = 'mpv --force-window %*', orphan = true, for = "windows" },
   { run = '''mediainfo "$1"; echo "Press enter to exit"; read _''', block = true, desc = "Show media info", for = "unix" },
 ]
+play-folder = [
+  { run = 'eza --no-quotes "$1"/*.m* | mpv --playlist=-', orphan = false, desc = "Mpv Folder" },
+]
 
 [open]
 rules = [
   # Folder
-  { name = "*/", use = [ "edit", "open", "reveal" ] },
+  { name = "*/", use = [ "open", "edit", "reveal", "play-folder" ] },
   # Text
   { mime = "text/*", use = [ "edit", "reveal" ] },
   # Image
