@@ -15,7 +15,7 @@ set visualbell
 """ Mappings
 
 let mapleader = " "
-inoremap jk <ESC>
+" inoremap jk <ESC>
 
 nmap <C-s> :w<CR>
 nmap <leader>nh :nohl<CR>

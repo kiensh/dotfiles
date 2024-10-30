@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ ${#@} -lt 2 ]; then
+  >&2 echo "Error: Missing arguments"
+  >&2 echo "Pattern: $(basename "$0") <extension> <folder1> <folder2> ..."
+  >&2 echo "Extension: 7z, zip, gzip, bzip2, lzip or tar"
+  exit 1
+fi
+
+ext=$1
+for f in "${@:2}"; do
+  [ -d "$f" ] || { >&2 echo "$f is not a directory"; continue; }
+  7z a -t$ext "$f" "$f"/*
+done
