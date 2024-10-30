@@ -1,14 +1,12 @@
 
-# function extract() {
-#   for f in "$@"; do
-#     case "$f" in
-#       *.tar.bz|*.tar.bz2|*.tbz|*.tbz2) echo tar xjvf "$f";;
-#       *.tar.gz|*.tgz) echo tar xzvf "$f";;
-#       *.tar.xz|*.txz) echo tar xJvf "$f";;
-#       *.tar.zst|*.zst) echo tar xaf "$f";;
-#       *.7z|*.zip) echo 7z x -o${f%.*} "$f";;
-#       *.rar) echo unrar x -o- "$f";;
-#     esac
-#   done
-# }
+# yazi
+function y() {
+    local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+    yazi "$@" --cwd-file="$tmp"
+    if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+        builtin cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
+    printf "\033[4 q" # change cursor style to underline steady
+}
 
