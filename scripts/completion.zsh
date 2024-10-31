@@ -25,7 +25,7 @@ function completion_ng() {
 function completion_docker() {
     [[ $(command -v docker) ]] && source <(docker completion zsh)
 }
-compdef completion_docker
+compdef completion_docker docker
 
 # Load Kubernetes autocompletion.
 function completion_kubectl() {
@@ -33,3 +33,8 @@ function completion_kubectl() {
 }
 compdef completion_kubectl kubectl
 
+# Load flutter autocompletion.
+function completion_flutter() {
+    [[ $(command -v flutter) ]] && source <(flutter bash-completion)
+}
+compdef completion_flutter flutter
