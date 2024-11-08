@@ -14,14 +14,14 @@ alias ls='ls --color=always'
 alias ld='ls -l | grep "^d" | grep -v "total"'
 alias lf='ls -lp --color=always | grep -v "^d" | grep -v "total"'
 alias lh='ls -ld .?*'
-alias lA='ls -lA | grep "^d" | grep -v "total" && ls -la | grep -v "^d"'
+alias ll='ls -lA | grep "^d" | grep -v "total" && ls -la | grep -v "^d"'
 # alias ll='ls -l'
 # alias lt='ls -ltr'
 if [ "$(command -v eza)" ]; then
     alias ld='eza -lD --show-symlinks'
     alias lf='eza -lf --show-symlinks'
     alias lh='eza -dl .* --group-directories-first'
-    alias lA='eza -la --group-directories-first'
+    alias ll='eza -la --group-directories-first'
     alias mpv-playlist="eza --no-quotes *.m* | mpv --playlist=-"
 fi
 
