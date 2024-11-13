@@ -29,7 +29,7 @@ Unknown = " "
 Windows = " "
 
 [directory]
-format = "[ $path ]($style)"
+format = "[$path]($style)"
 truncation_length = 3
 truncation_symbol = "…/"
 
@@ -53,16 +53,16 @@ format = "[ $symbol $branch ]($style)"
 
 [git_status]
 format = "[$all_status$ahead_behind]($style)"
-conflicted = "[=$count ]"
-stashed = "[$count ](#3d85c6)"
-deleted = "[✘$count ](#f08080)"
-renamed = "[»$count ](#86BBD8)"
-modified = "[!$count ](#7fb2b2)"
-staged = "[+$count ](#86BBD8)"
-untracked = "[?$count ](#9cd26d)"
-ahead = '⇡$count '
+conflicted = "[=$count]"
+stashed = "[$count](#3d85c6)"
+deleted = "[✘$count](#f08080)"
+renamed = "[»$count](#86BBD8)"
+modified = "[!$count](#7fb2b2)"
+staged = "[+$count](#86BBD8)"
+untracked = "[?$count](#9cd26d)"
+ahead = '⇡$count'
 diverged = '⇕⇡$ahead_count⇣$behind_count '
-behind = '⇣$count '
+behind = '⇣$count'
 
 [conda]
 symbol = "🅒 "
