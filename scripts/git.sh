@@ -2,6 +2,7 @@
 alias gb='git branch'
 alias gc='git checkout'
 alias gcb='git checkout -b'
+alias gst='git status'
 function gcd() {
     current=$(git_current_branch)
     target=$(git_main_branch)
