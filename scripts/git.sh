@@ -5,7 +5,7 @@ alias gcb='git checkout -b'
 alias gst='git status'
 function gcd() {
     current=$(git_current_branch)
-    target=$(git_main_branch)
+    target=${1-$(git_main_branch)}
 
     git checkout $target
     git pull origin $target
