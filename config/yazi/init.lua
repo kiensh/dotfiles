@@ -50,11 +50,11 @@ local function full_border()
 			c[3]:padding(ui.Padding.y(1)),
 		}
 
-		local style = THEME.manager.border_style
-		self._base = ya.list_merge(self._base or {}, {
-			v4("border", self._area, ui.Border.ALL):type(type):style(style),
-			v4("bar", self._chunks[1], ui.Bar.RIGHT):style(style),
-			v4("bar", self._chunks[3], ui.Bar.LEFT):style(style),
+        local style = THEME.manager.border_style
+        self._base = ya.list_merge(self._base or {}, {
+            v4("border", self._area, ui.Border.ALL):type(type):style(style),
+            v4("bar", self._chunks[1], ui.Bar.RIGHT):style(style),
+            v4("bar", self._chunks[3], ui.Bar.LEFT):style(style),
 
 			bar("┬", c[1].right - 1, c[1].y),
 			bar("┴", c[1].right - 1, c[1].bottom - 1),
