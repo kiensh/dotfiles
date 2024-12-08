@@ -1,6 +1,6 @@
 general.import = [
-    "/Users/kien/.config/alacritty/themes/dracula.toml",
-    "/Users/kien/.config/alacritty/themes/catppuccin-mocha.toml",
+    "themes/dracula.toml",
+    "themes/catppuccin-mocha.toml",
 ]
 
 [colors]
@@ -38,8 +38,8 @@ multiplier = 3
 [selection]
 save_to_clipboard = false
 
-# [shell]
-# program = "/bin/zsh"
+# [terminal]
+# shell = "/bin/zsh"
 
 [window]
 opacity = 0.8

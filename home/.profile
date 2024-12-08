@@ -1,7 +1,4 @@
 
-# homebrew
-eval "$(/opt/homebrew/bin/brew shellenv)"
-
 export EDITOR="nvim"
 export BROWSER="firefox"
 export ZDOTDIR="$HOME"

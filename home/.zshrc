@@ -1,4 +1,7 @@
 
+# brew
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
 # starship
 [[ -x /opt/homebrew/bin/starship ]] && eval "$(starship init zsh)"
 
