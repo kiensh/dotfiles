@@ -117,7 +117,7 @@ keymap = [
   { on = "<C-->",     run = "hardlink",                    desc = "Hardlink yanked files" },
   { on = "Y",         run = "unyank",                      desc = "Cancel the yank status" },
   { on = "X",         run = "unyank",                      desc = "Cancel the yank status" },
-  { on = "d",         run = "shell --block --interactive 'mkdir -p '",                      desc = "Make directories" },
+  { on = "d",         run = "create --dir",                desc = "Make directories" },
   # { on = "d",         run = "remove",                      desc = "Trash selected files" },
   { on = "D",         run = "remove --permanently",        desc = "Permanently delete selected files" },
   { on = "a",         run = "create",                      desc = "Create a file (ends with / for directories)" },
