@@ -22,6 +22,6 @@ if [ "$(command -v eza)" ]; then
     alias lf='eza -lf --show-symlinks'
     alias lh='eza -dl .* --group-directories-first'
     alias ll='eza -la --group-directories-first'
-    alias mpv-playlist="eza --no-quotes *.m* | mpv --playlist=-"
+    alias mpv-playlist="eza --no-quotes *.{mp4,mkv} | mpv --playlist=-"
 fi
 
