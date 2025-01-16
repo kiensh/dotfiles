@@ -3,19 +3,17 @@ alias gb='git branch'
 alias gc='git checkout'
 alias gcb='git checkout -b'
 alias gst='git status'
+alias ggl='git pull origin $(git_current_branch)'
+alias ggp='git push origin $(git_current_branch)'
+alias glg='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --stat'
+alias glo='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --all'
 function gcd() {
     current=$(git_current_branch)
-    target=${1-$(git_main_branch)}
+    target=$(git config get branch.working || git_main_branch)
 
     git checkout $target
     git pull origin $target
     git branch -D $current
-}
-function ggl() {
-    git pull origin ${1-$(git_current_branch)} ${@:2}
-}
-function ggp() {
-    git push origin ${1-$(git_current_branch)} ${@:2}
 }
 function git_current_branch () {
     local ref
@@ -31,7 +29,7 @@ function git_current_branch () {
 function git_main_branch () {
     command git rev-parse --git-dir &> /dev/null || return
     local ref
-    for ref in refs/{heads,remotes/{origin,upstream}}/{main,trunk,mainline,default,stable,master,dev,develop}
+    for ref in refs/{heads,remotes/{origin,upstream}}/{main,master,develop}
     do
         if command git show-ref -q --verify $ref
         then
@@ -39,13 +37,7 @@ function git_main_branch () {
             return 0
         fi
     done
-    echo master
+    echo main
     return 1
-}
-function glg() {
-    git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --stat
-}
-function glo() {
-    git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --all
 }
 
