@@ -8,7 +8,7 @@ mkdir -p $HOME/.local/bin
 for dir in config/*; do
     [ ! -d $dir ] && continue
     dir=${dir#config/}
-    mkdir -v $HOME/.config/$dir
+    mkdir -pv $HOME/.config/$dir
 done
 
 stow -v --adopt --target $HOME home
