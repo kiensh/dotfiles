@@ -9,7 +9,7 @@ alias glg='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgree
 alias glo='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --all'
 function gcd() {
     current=$(git_current_branch)
-    target=$(git config get branch.working || git_main_branch)
+    target=$(git config --get branch.working || git_main_branch)
 
     git checkout $target
     git pull origin $target
