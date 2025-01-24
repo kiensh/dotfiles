@@ -3,13 +3,15 @@ alias gb='git branch'
 alias gc='git checkout'
 alias gcb='git checkout -b'
 alias gst='git status'
+alias gs='git stash'
+alias gsp='git stash pop'
 alias ggl='git pull origin $(git_current_branch)'
 alias ggp='git push origin $(git_current_branch)'
 alias glg='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --stat'
 alias glo='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --all'
 function gcd() {
     current=$(git_current_branch)
-    target=$(git config --get branch.working || git_main_branch)
+    target=${1-$(git config --get branch.working || git_main_branch)}
 
     git checkout $target
     git pull origin $target
