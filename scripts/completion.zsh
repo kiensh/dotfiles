@@ -11,30 +11,20 @@ autoload -Uz compinit
 compinit -u
 
 ### Using Compdef ###
-function completion_fzf() {
-    [[ $(command -v fzf) ]] && source <(fzf --zsh)
-}
+function _fzf() { source <(fzf --zsh); }
+[[ $(command -v fzf) ]] && compdef _fzf fzf
 
-function completion_ng() {
-    [[ $(command -v ng) ]] && source <(ng completion script)
-}
+function _ng() { source <(ng completion script); }
+[[ $(command -v ng) ]] && compdef _ng ng
 
-function completion_docker() {
-    [[ $(command -v docker) ]] && source <(docker completion zsh)
-}
-compdef completion_docker docker
+function _docker() { source <(docker completion zsh); }
+[[ $(command -v docker) ]] && compdef _docker docker
 
-function completion_kubectl() {
-    [[ $(command -v kubectl) ]] && source <(kubectl completion zsh)
-}
-compdef completion_kubectl kubectl
+function _kubectl() { source <(kubectl completion zsh); }
+[[ $(command -v kubectl) ]] && compdef _kubectl kubectl
 
-function completion_flutter() {
-    [[ $(command -v flutter) ]] && source <(flutter bash-completion)
-}
-compdef completion_flutter flutter
+function _flutter() { source <(flutter bash-completion); }
+[[ $(command -v flutter) ]] && compdef _flutter flutter
 
-function completion_colima() {
-    [[ $(command -v colima) ]] && source <(colima completion zsh)
-}
-compdef completion_colima colima
+function _colima() { source <(colima completion zsh); }
+[[ $(command -v colima) ]] && compdef _colima colima
