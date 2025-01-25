@@ -1,6 +1,6 @@
 
 # Test Your Shell Load Time
-function timezsh() {
+function time-shell() {
   shell=${1-$SHELL}
   for i in $(seq 1 10); do /usr/bin/time $shell -i -c exit; done
 }
