@@ -11,30 +11,30 @@ autoload -Uz compinit
 compinit -u
 
 ### Using Compdef ###
-# fzf
 function completion_fzf() {
     [[ $(command -v fzf) ]] && source <(fzf --zsh)
 }
 
-# Load Angular CLI autocompletion.
 function completion_ng() {
     [[ $(command -v ng) ]] && source <(ng completion script)
 }
 
-# Load docker autocompletion.
 function completion_docker() {
     [[ $(command -v docker) ]] && source <(docker completion zsh)
 }
 compdef completion_docker docker
 
-# Load Kubernetes autocompletion.
 function completion_kubectl() {
     [[ $(command -v kubectl) ]] && source <(kubectl completion zsh)
 }
 compdef completion_kubectl kubectl
 
-# Load flutter autocompletion.
 function completion_flutter() {
     [[ $(command -v flutter) ]] && source <(flutter bash-completion)
 }
 compdef completion_flutter flutter
+
+function completion_colima() {
+    [[ $(command -v colima) ]] && source <(colima completion zsh)
+}
+compdef completion_colima colima
