@@ -1,6 +1,6 @@
 
 alias mpv-playlist="ls *.{mp4,mkv} | sort -V | mpv --playlist=-"
-alias v="nvim"
+alias v="vim"
 
 # LINUX
 export LS_COLORS="di=1;36:ln=35:so=32:pi=33:ex=31:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;43"
@@ -24,4 +24,10 @@ if [ "$(command -v eza)" ]; then
     alias ll='eza -la --group-directories-first'
     alias mpv-playlist="eza --no-quotes *.{mp4,mkv} | mpv --playlist=-"
 fi
+
+# Tools
+[[ $(command -v nvim) ]] && alias v="nvim"
+[[ $(command -v colima) ]] && alias c='colima'
+[[ $(command -v docker) ]] && alias d='docker'
+[[ $(command -v kubectl) ]] && alias k='kubectl'
 
