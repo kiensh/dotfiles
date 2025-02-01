@@ -12,3 +12,6 @@ if [[ -d "$HOME/scripts" ]]; then
     done
 fi
 
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/kien/.lmstudio/bin"

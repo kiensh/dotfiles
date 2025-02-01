@@ -44,3 +44,6 @@ export CPPFLAGS="-I/Library/Java/JavaVirtualMachines/oracle-jdk-21.0.3/include"
 if [ $(command -v kubectl) ]; then
     export KUBECONFIG="$HOME/.kube/config.yml"
 fi
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/kien/.lmstudio/bin"
