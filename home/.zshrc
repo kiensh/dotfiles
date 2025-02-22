@@ -1,4 +1,7 @@
 
+# Crontab
+crontab $HOME/backup/crontab.txt
+
 # brew
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
