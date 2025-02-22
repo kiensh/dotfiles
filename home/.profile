@@ -12,29 +12,29 @@ export LS_COLORS="di=1;34:ln=1;36:so=1;35:pi=1;33:ex=1;32:bd=1;33:cd=1;33:su=37;
 export LSCOLORS="Gxfxcxdxbxegedabagacad"
 export LSCOLORS="ExGxFxDxCxDxDxhbadbxbx"
 
-[ -d "$HOME/.local/bin" ] && export PATH+=":$HOME/.local/bin"
+[ -d "$HOME/.local/bin" ] && PATH+=":$HOME/.local/bin"
 
 # dotnet
 if [ -d "$HOME/dotnet" ]; then
     export DOTNET_ROOT="$HOME/dotnet"
-    export PATH="$PATH:$HOME/dotnet"
-    [ -d "$HOME/.dotnet/tools" ] && export PATH="$PATH:$HOME/.dotnet/tools"
+    PATH+="$HOME/dotnet"
+    [ -d "$HOME/.dotnet/tools" ] && PATH+="$HOME/.dotnet/tools"
 fi
 
 # rclone
-[ -d "$HOME/rclone" ] && export PATH="$PATH:$HOME/rclone"
+[ -d "$HOME/rclone" ] && PATH+="$HOME/rclone"
 
 # Added by Toolbox App
-export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
+PATH+="$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 
 # flutter
 if [ $(command -v flutter) ]; then
-    export PATH="$PATH:$HOME/.pub-cache/bin"
+    PATH+="$HOME/.pub-cache/bin"
 fi
 
 # jdk
 export JAVA_HOME="/Library/Java/JavaVirtualMachines/oracle-jdk-21.0.3"
-export PATH="$PATH:/Library/Java/JavaVirtualMachines/oracle-jdk-21.0.3/bin"
+PATH+="/Library/Java/JavaVirtualMachines/oracle-jdk-21.0.3/bin"
 export CPPFLAGS="-I/Library/Java/JavaVirtualMachines/oracle-jdk-21.0.3/include"
 
 # kubectl
