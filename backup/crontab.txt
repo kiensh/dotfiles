@@ -1,2 +1,2 @@
-00 * * * * /bin/bash $HOME/backup/time-schedule.sh >> $HOME/backup/backup.log
+00 20 * * * /bin/bash $HOME/backup/time-schedule.sh >> $HOME/backup/backup.log
 
