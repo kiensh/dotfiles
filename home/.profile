@@ -17,24 +17,24 @@ export LSCOLORS="ExGxFxDxCxDxDxhbadbxbx"
 # dotnet
 if [ -d "$HOME/dotnet" ]; then
     export DOTNET_ROOT="$HOME/dotnet"
-    PATH+="$HOME/dotnet"
-    [ -d "$HOME/.dotnet/tools" ] && PATH+="$HOME/.dotnet/tools"
+    PATH+=":$HOME/dotnet"
+    [ -d "$HOME/.dotnet/tools" ] && PATH+=":$HOME/.dotnet/tools"
 fi
 
 # rclone
-[ -d "$HOME/rclone" ] && PATH+="$HOME/rclone"
+[ -d "$HOME/rclone" ] && PATH+=":$HOME/rclone"
 
 # Added by Toolbox App
-PATH+="$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
+PATH+=":$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 
 # flutter
 if [ $(command -v flutter) ]; then
-    PATH+="$HOME/.pub-cache/bin"
+    PATH+=":$HOME/.pub-cache/bin"
 fi
 
 # jdk
 export JAVA_HOME="/Library/Java/JavaVirtualMachines/oracle-jdk-21.0.3"
-PATH+="/Library/Java/JavaVirtualMachines/oracle-jdk-21.0.3/bin"
+PATH+=":/Library/Java/JavaVirtualMachines/oracle-jdk-21.0.3/bin"
 export CPPFLAGS="-I/Library/Java/JavaVirtualMachines/oracle-jdk-21.0.3/include"
 
 # kubectl
