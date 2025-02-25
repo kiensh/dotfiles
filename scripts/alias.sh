@@ -23,4 +23,5 @@ fi
 [[ $(command -v colima) ]] && alias c='colima'
 [[ $(command -v docker) ]] && alias d='docker'
 [[ $(command -v kubectl) ]] && alias k='kubectl'
+[[ $(command -v vifm) ]] && alias vf='vifm'
 
