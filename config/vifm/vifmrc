@@ -107,34 +107,6 @@ mark b ~/bin/
 mark h ~/
 
 " ------------------------------------------------------------------------------
-" Commands
-" ------------------------------------------------------------------------------
-
-" :com[mand][!] command_name action
-"
-" These are some of the macros that can be used in the action part:
-"  %a for user arguments
-"  %c for current file under the cursor
-"  %C for current file under the cursor of inactive pane
-"  %f for selected file(s)
-"  %F for selected file(s) of inactive pane
-"  %b is the same as %f %F
-"  %d for current directory name
-"  %D for current directory name of inactive pane
-"  %r{x} for list of files in register {x}
-"  %m runs the command in a menu window
-"  %u uses command's output to build a file list
-"  see `:help vifm-macros` and `:help vifm-filename-modifiers` for more
-
-command! df df -h %m 2> /dev/null
-command! diff vim -d %f %F
-command! zip zip -r %c.zip %f
-command! run !! ./%f
-command! make !!make %a
-command! mkcd :mkdir %a | cd %a
-command! reload :write | restart full
-
-" ------------------------------------------------------------------------------
 " File types association
 " ------------------------------------------------------------------------------
 
@@ -341,28 +313,39 @@ fileviewer {*.docx},
 " unknown file types on l/Enter keys.
 filetype * open
 
-" ------------------------------------------------------------------------------
-" Panel configuration examples
-" ------------------------------------------------------------------------------
-
-" Customize view columns a bit (enable ellipsis for truncated file names)
-" set viewcolumns=-{name}..,6{}.
-
-" Show vertical border
-" set fillchars=vborder:│
-
-" Filter-out build and temporary files
-" filter! {*.lo,*.o,*.d,*.class,*.pyc,*.pyo,.*~}
 
 " ------------------------------------------------------------------------------
-" Sample keyboard mappings
+" Commands
 " ------------------------------------------------------------------------------
+
+" :com[mand][!] command_name action
+"
+" These are some of the macros that can be used in the action part:
+"  %a for user arguments
+"  %c for current file under the cursor
+"  %C for current file under the cursor of inactive pane
+"  %f for selected file(s)
+"  %F for selected file(s) of inactive pane
+"  %b is the same as %f %F
+"  %d for current directory name
+"  %D for current directory name of inactive pane
+"  %r{x} for list of files in register {x}
+"  %m runs the command in a menu window
+"  %u uses command's output to build a file list
+"  see `:help vifm-macros` and `:help vifm-filename-modifiers` for more
+
+command! df df -h %m 2> /dev/null
+command! diff vim -d %f %F
+command! zip zip -r %c.zip %f
+command! run !! ./%f
+command! reload :write | restart full
 
 nnoremap gd :cd ~/Downloads/<cr>
 nnoremap gD :cd ~/Documents/<cr>
 
 " due to terminal input problem with <c-h> and <bs>
 nnoremap <bs> <c-w>h
+nnoremap <c-h> <c-w>h
 nnoremap <c-l> <c-w>l
 
 nnoremap P :!eza --no-quotes *.m?? | mpv --playlist=-
@@ -371,6 +354,12 @@ nnoremap cp :!printf %c | pbcopy<cr>
 
 nnoremap o :!open %f<cr>
 nnoremap O :!open --reveal %f<cr>
+
+nnoremap d :mkdir<space>
+
+nnoremap D :delete<space>
+
+nnoremap % :!touch<space>
 
 " Yank current directory path into the clipboard
 nnoremap yd :!printf %d | pbcopy<cr>
