@@ -28,3 +28,7 @@ function _flutter() { source <(flutter bash-completion); }
 
 function _colima() { source <(colima completion zsh); }
 [[ $(command -v colima) ]] && compdef _colima colima
+
+function _helm() { source <(helm completion zsh); }
+[[ $(command -v helm) ]] && compdef _helm helm
+
