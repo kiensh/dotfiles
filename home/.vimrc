@@ -75,7 +75,7 @@ if $TERM_PROGRAM =~ "iTerm"
 endif
 
 " Colorscheme: catppuccin_mocha
-colorscheme catppuccin_mocha
+" colorscheme catppuccin_mocha
 
 " Plugins: vim-highlightedyank
 let g:highlightedyank_highlight_duration = 100
