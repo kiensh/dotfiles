@@ -16,18 +16,19 @@
 " Mind that due to `filetype * open` below by default the editor won't be used
 " for opening files via l/Enter keys.  Comment that line out to change the
 " behaviour.
-if executable('vim')
-    set vicmd=vim
-elseif executable('nvim')
-    set vicmd=nvim
-elseif executable('elvis')
-    set vicmd=elvis\ -G\ termcap
-elseif executable('vile')
-    set vicmd=vile
-elseif $EDITOR != ''
-    echo 'Note: using `'.$EDITOR.'` as an editor'
-    let &vicmd = $EDITOR
-endif
+set vicmd=vim
+" if executable('vim')
+"     set vicmd=vim
+" elseif executable('nvim')
+"     set vicmd=nvim
+" elseif executable('elvis')
+"     set vicmd=elvis\ -G\ termcap
+" elseif executable('vile')
+"     set vicmd=vile
+" elseif $EDITOR != ''
+"     echo 'Note: using `'.$EDITOR.'` as an editor'
+"     let &vicmd = $EDITOR
+" endif
 
 " This makes vifm perform file operations on its own instead of relying on
 " standard utilities like `cp`.  While using `cp` and alike is a more universal
@@ -45,11 +46,10 @@ set trash
 
 " What should be saved automatically on restarting vifm.  Drop "savedirs"
 " value if you don't want vifm to remember last visited directories for you.
-set vifminfo=dhistory,savedirs,chistory,state,tui,tabs,shistory,ehistory,
+set vifminfo=dhistory,chistory,state,tui,tabs,shistory,ehistory,
             \phistory,fhistory,dirstack,registers,bookmarks,bmarks,mchistory
 
 " List of color schemes to try (picks the first one supported by the terminal)
-colorscheme Default-256 Default
 colorscheme onedark
 
 set number relativenumber
@@ -97,6 +97,11 @@ endif
 " Add -s to the default value to suppress "Permission denied" errors
 set grepprg="grep -n -H -I -r -s %i %a %s"
 
+" if 'cpoptions' contains "t" flag, <tab> and <c-i> switch active pane just
+" like <space> does, otherwise it goes forward through directory history of
+" current view.
+set cpoptions-=t
+
 " ------------------------------------------------------------------------------
 " Bookmarks
 " ------------------------------------------------------------------------------
@@ -104,7 +109,6 @@ set grepprg="grep -n -H -I -r -s %i %a %s"
 " :mark mark /full/directory/path [filename]
 
 mark b ~/bin/
-mark h ~/
 
 " ------------------------------------------------------------------------------
 " File types association
@@ -193,12 +197,12 @@ fileviewer {*.avi,*.mp4,*.wmv,*.dat,*.3gp,*.ogv,*.mkv,*.mpg,*.mpeg,*.vob,
 
 " Web
 filetype {*.xhtml,*.html,*.htm},<text/html>
-       \ {Open in Safari}
-       \ open -a Safari.app,
        \ {Open in Firefox}
        \ open -a Firefox.app,
        \ {Open in Chrome}
        \ open -a Google\ Chrome.app,
+       \ {Open in Safari}
+       \ open -a Safari.app,
        \ {Open in vim}
        \ vim,
 fileviewer {*.xhtml,*.html,*.htm},<text/html> w3m -dump -T text/html
@@ -340,6 +344,9 @@ command! zip zip -r %c.zip %f
 command! run !! ./%f
 command! reload :write | restart full
 
+nnoremap q :q<cr>
+
+nnoremap gh :cd ~/<cr>
 nnoremap gd :cd ~/Downloads/<cr>
 nnoremap gD :cd ~/Documents/<cr>
 
@@ -348,18 +355,32 @@ nnoremap <bs> <c-w>h
 nnoremap <c-h> <c-w>h
 nnoremap <c-l> <c-w>l
 
-nnoremap P :!eza --no-quotes *.m?? | mpv --playlist=-
+nnoremap M :!eza --no-quotes *.m?? | mpv --playlist=-
 
 nnoremap cp :!printf %c | pbcopy<cr>
+
+nnoremap E :!nvim %f<cr>
 
 nnoremap o :!open %f<cr>
 nnoremap O :!open --reveal %f<cr>
 
 nnoremap d :mkdir<space>
 
-nnoremap D :delete<space>
+nnoremap D :delete<cr>
 
 nnoremap % :!touch<space>
+
+nnoremap S :!get_size %d %m<cr>
+
+" let $script='/Users/kien/.local/share/vifm/script.sh'
+" !bash -c "[[ ! -f $script ]] && touch $script || true"
+" noremap y :!echo 'cp -vr %f:p "$1" | less' > $script<cr>
+" noremap x :!echo 'mv -v %f:p "$1" | less' > $script<cr>
+" nnoremap p :!bash $script %d<cr>
+
+" TODO: rewrite yank and put into a script
+" nnoremap y :!copy.sh %f:p | less<cr>
+" vnoremap y :!copy.sh %f:p | less<cr>gv<cr>
 
 " Yank current directory path into the clipboard
 nnoremap yd :!printf %d | pbcopy<cr>

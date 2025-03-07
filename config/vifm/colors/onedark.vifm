@@ -3,6 +3,8 @@
 " Reset all styles first
 highlight clear
 
+source ~/.config/vifm/colors/filetypes.vifm
+
 highlight Border        cterm=none           ctermfg=035        ctermbg=default
 
 highlight TopLine       cterm=none           ctermfg=000        ctermbg=default
