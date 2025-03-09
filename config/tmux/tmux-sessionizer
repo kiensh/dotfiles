@@ -6,6 +6,7 @@ folders+="$HOME/Workspaces "
 folders+="$HOME/Workspaces/personal "
 folders+="$HOME/Workspaces/HK6 "
 folders+="$HOME/Workspaces/HK7 "
+folders+="$HOME/Workspaces/HK8 "
 
 selected=$(find $folders -mindepth 1 -maxdepth 1 -type d | fzf)
 if [[ -z $selected ]]; then

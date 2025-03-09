@@ -23,5 +23,7 @@ fi
 [[ $(command -v colima) ]] && alias c='colima'
 [[ $(command -v docker) ]] && alias d='docker'
 [[ $(command -v kubectl) ]] && alias k='kubectl'
-[[ $(command -v vifm) ]] && alias vf='vifm'
+[[ $(command -v vifm) ]] && alias vf='vifm .'
+[[ $(command -v python3) ]] && alias py='python3'
+[[ $(command -v pip3) ]] && alias pi='pip3'
 

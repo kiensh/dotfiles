@@ -46,7 +46,7 @@ set trash
 
 " What should be saved automatically on restarting vifm.  Drop "savedirs"
 " value if you don't want vifm to remember last visited directories for you.
-set vifminfo=dhistory,chistory,state,tui,tabs,shistory,ehistory,
+set vifminfo=dhistory,savedirs,chistory,state,tui,tabs,shistory,ehistory,
             \phistory,fhistory,dirstack,registers,bookmarks,bmarks,mchistory
 
 " List of color schemes to try (picks the first one supported by the terminal)
@@ -371,6 +371,8 @@ nnoremap D :delete<cr>
 nnoremap % :!touch<space>
 
 nnoremap S :!get_size %d %m<cr>
+
+nnoremap s :sync!<cr>
 
 " let $script='/Users/kien/.local/share/vifm/script.sh'
 " !bash -c "[[ ! -f $script ]] && touch $script || true"
