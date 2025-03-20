@@ -134,7 +134,7 @@ where_mpv() {
 
 # SCRAPING
 
-# extract the video links from response of embed urls, extract mp4 links form m3u8 lists
+# extract the video links from response of embed urls, extract mp4 links from m3u8 lists
 get_links() {
     episode_link="$(curl -e "$allanime_refr" -s "https://${allanime_base}$*" -A "$agent" | sed 's|},{|\
 |g' | sed -nE 's|.*link":"([^"]*)".*"resolutionStr":"([^"]*)".*|\2 >\1|p;s|.*hls","url":"([^"]*)".*"hardsub_lang":"en-US".*|\1|p')"
