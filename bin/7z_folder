@@ -6,15 +6,22 @@ if [ ${#@} -lt 2 ]; then
   exit 1
 fi
 
-exts=(7z zip gzip bzip2 lzip tar)
-if [[ ! " ${exts[@]} " =~ " $1 " ]]; then
+exts=(7z zip)
+ext=$1
+if [[ ! " ${exts[@]} " =~ " $ext " ]]; then
   >&2 echo "Error: Invalid extension";
-  >&2 echo "Extension: ${exts[@]}"
+  >&2 echo "Available extension ${exts[@]}"
   exit 1;
 fi
 
-ext=$1
 for f in "${@:2}"; do
-  [ -d "$f" ] || { >&2 echo "$f is not a directory"; continue; }
-  7z a -t$ext "$f" "$f"/*
+  [ ! -d "$f" ] && { >&2 echo "Error: $f is not a directory"; continue; }
+  case "$ext" in
+    7z) 7z a "$f.7z" "$f"/*;;
+    zip) 7z a "$f.zip" "$f"/*;;
+    # gzip) 7z a -t$ext "$f" "$f"/*;;
+    # bzip2) 7z a "$f.tar.bz2" "$f"/*;;
+    # lzip) 7z a "$f.tar.lz" "$f"/*;;
+    # tar) 7z a "$f.tar" "$f"/*;;
+  esac
 done
