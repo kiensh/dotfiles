@@ -1,4 +1,6 @@
 format = """
+$os\
+$username\
 $directory\
 $git_branch\
 $git_status\
@@ -18,12 +20,12 @@ vimcmd_symbol = '[ ](bold green) '
 [username]
 show_always = true
 format = "[$user ]($style)"
-disabled = false
+disabled = true
 
 # An alternative to the username module which displays a symbol that
 # represents the current operating system
 [os]
-disabled = false # Disabled by default
+disabled = true
 format = "[$symbol]($style)"
 [os.symbols]
 Arch = "󰣇 "
@@ -45,6 +47,7 @@ truncation_symbol = "…/"
 "Music" = " "
 "Pictures" = " "
 "Workspaces" = " "
+".config" = " "
 # Keep in mind that the order matters. For example:
 # "Important Documents" = " 󰈙 "
 # will not be replaced, because "Documents" was already substituted before.
@@ -52,8 +55,8 @@ truncation_symbol = "…/"
 # "Important 󰈙 " = " 󰈙 "
 
 [git_branch]
-symbol = ""
-format = "[ $symbol $branch ]($style)"
+symbol = " "
+format = "[ $symbol$branch ]($style)"
 
 [git_status]
 format = "[$all_status$ahead_behind]($style)"
