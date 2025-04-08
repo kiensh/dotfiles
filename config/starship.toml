@@ -2,12 +2,16 @@ format = """
 $directory\
 $git_branch\
 $git_status\
-$conda\
-[  ](fg:#674ea7)\
+$character\
 """
 
 # Disable the blank line at the start of the prompt
-# add_newline = false
+add_newline = true
+
+[character]
+success_symbol = '[ ](fg:#674ea7) '
+error_symbol = '[✗](bold red) '
+vimcmd_symbol = '[ ](bold green) '
 
 # You can also replace your username with a neat symbol like   or disable this
 # and use the os module below
@@ -29,8 +33,8 @@ Unknown = " "
 Windows = " "
 
 [directory]
-format = "[$path]($style)"
-truncation_length = 3
+format = "[$path]($style) "
+truncation_length = 2
 truncation_symbol = "…/"
 
 # Here is how you can shorten some long paths by text replacement
