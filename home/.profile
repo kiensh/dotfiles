@@ -12,6 +12,8 @@ export LS_COLORS="di=1;34:ln=1;36:so=1;35:pi=1;33:ex=1;32:bd=1;33:cd=1;33:su=37;
 export LSCOLORS="Gxfxcxdxbxegedabagacad"
 export LSCOLORS="ExGxFxDxCxDxDxhbadbxbx"
 
+function ..() { cd ..; }
+
 [ -d "$HOME/.local/bin" ] && PATH+=":$HOME/.local/bin"
 
 # dotnet

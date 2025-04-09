@@ -3,6 +3,162 @@
     "shows": {
       "edges": [
         {
+          "_id": "3MhxWCTBsbDaFEaof",
+          "name": "Aru Majo ga Shinu Made",
+          "availableEpisodes": { "sub": 2, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "3jA6iC7WjFtq9ctAw",
+          "name": "Shiunji-ke no Kodomotachi",
+          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "f46MBkpyiP6fdT5Ri",
+          "name": "Chang Ge Xing",
+          "availableEpisodes": { "sub": 8, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "hEQboPQtuKx2N2Lmb",
+          "name": "Lian Qi Shi Wan Nian",
+          "availableEpisodes": { "sub": 224, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "aKxjf5rbXghxrkoQW",
+          "name": "Wan Jie Du Zun Season 3",
+          "availableEpisodes": { "sub": 38, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "3sL49myhDbDLZHRSP",
+          "name": "Quanqiu Gao Wu",
+          "availableEpisodes": { "sub": 16, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "48LSqzbA9D6Bvhihf",
+          "name": "Wushen Zhuzai",
+          "availableEpisodes": { "sub": 536, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "YoodqaHGpwQg6bSJH",
+          "name": "Beyblade X",
+          "availableEpisodes": { "sub": 75, "dub": 51, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "6YupfnBfRYG7zheZZ",
+          "name": "My Senior Brother is Too Strong",
+          "availableEpisodes": { "sub": 8, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "dyeJbCM8LBpE8u4PY",
+          "name": "Super God is My Master",
+          "availableEpisodes": { "sub": 26, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "xqvnER2ZSAMiW4vwm",
+          "name": "Mushen Ji",
+          "availableEpisodes": { "sub": 25, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "BCR7GDd4w4PN4GoKW",
+          "name": "Fighting the World [Dou Zhan Tianxia]",
+          "availableEpisodes": { "sub": 23, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "r6bYnFT6WC823HEp9",
+          "name": "Jueshi Zhan Hun",
+          "availableEpisodes": { "sub": 101, "dub": 1, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "3DydcimQZgcQPZ3gu",
+          "name": "The Legend of Princess Chang Ge [Chang Ge Xing]",
+          "availableEpisodes": { "sub": 8, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "wSBNCkMjKz2fGXcyN",
+          "name": "Sono Hanabira ni Kuchizuke wo: Reo x Mai Diaries",
+          "availableEpisodes": { "sub": 10, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "CeguxFgWvwMDBpWnD",
+          "name": "#Compass 2.0: Sentou Setsuri Kaiseki System",
+          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "GKW9QN6EsdLXXjWKF",
+          "name": "Himitsu no AiPri: Ring-hen",
+          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "2Mjzc7HzGFCzzCZ8k",
+          "name": "Chuuzenji-sensei Mononoke Kougiroku: Sensei ga Nazo wo Hodoite Shimau kara.",
+          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "wTWPWR2ynCijvGypu",
+          "name": "Zongmen Li Chule Wo Dou Shi Wodi",
+          "availableEpisodes": { "sub": 56, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "38g4KExoetfXKfziz",
+          "name": "Kijin Gentoushou",
+          "availableEpisodes": { "sub": 2, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "aeyY79srAMZT7yKPP",
+          "name": "Summer Pockets",
+          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "ktzXGH9dycuBnRHaS",
+          "name": "Line Town",
+          "availableEpisodes": { "sub": 22, "dub": 0, "raw": 50 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "yn5QXgtBXYoNDdogB",
+          "name": "Vigilante: Boku no Hero Academia Illegals",
+          "availableEpisodes": { "sub": 1, "dub": 1, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "e5NyxmnktaKqJGNiB",
+          "name": "Zatsu Tabi: That's Journey",
+          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "35WfvgNJPfEdmjjsp",
+          "name": "Aharen-san wa Hakarenai Season 2",
+          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
+          "_id": "qLoF9HmHWPBuJnRqW",
+          "name": "Princess-Session Orchestra",
+          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
+          "__typename": "Show"
+        },
+        {
           "_id": "PM4hwu3HqnvjbPHjq",
           "name": "Koisuru One Piece",
           "availableEpisodes": { "sub": 5, "dub": 0, "raw": 0 },
@@ -84,162 +240,6 @@
           "_id": "ReooPAxPMsHM4KPMY",
           "name": "1P",
           "availableEpisodes": { "sub": 1125, "dub": 1102, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "b7wWBpmGm2nuRfMbC",
-          "name": "Gorilla no Kami kara Kago sareta Reijou wa Ouritsu Kishidan de Kawaigarareru",
-          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "QTwECRQoQh54hL9eK",
-          "name": "Maebashi Witches",
-          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "q2aRmfLrWSpSWynsc",
-          "name": "Kanchigai no Atelier Meister: Eiyuu Party no Moto Zatsuyougakari ga, Jitsu wa Sentou Igai ga SSS Rank Datta to Iu Yoku Aru Hanashi",
-          "availableEpisodes": { "sub": 2, "dub": 2, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "HXYw5xJsu35Wzztag",
-          "name": "Kimi to Idol Precure♪",
-          "availableEpisodes": { "sub": 9, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "juAKHWMFoQXp3FRFJ",
-          "name": "Mashin Souzouden Wataru",
-          "availableEpisodes": { "sub": 13, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "k4rzW8gPRRDhyJ4Ht",
-          "name": "Witch Watch",
-          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "iFP3ZATXM4EitBsXc",
-          "name": "Uma Musume: Cinderella Gray",
-          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "6YupfnBfRYG7zheZZ",
-          "name": "My Senior Brother is Too Strong",
-          "availableEpisodes": { "sub": 7, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "THMCYTSQWC82yaDAH",
-          "name": "Doupo Cangqiong: Nian Fan",
-          "availableEpisodes": { "sub": 141, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "H5KZruH8hytXuT6oh",
-          "name": "Lazarus",
-          "availableEpisodes": { "sub": 1, "dub": 1, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "t7EYc2K2dzKkmrmoA",
-          "name": "Classic★Stars",
-          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "48LSqzbA9D6Bvhihf",
-          "name": "Wushen Zhuzai",
-          "availableEpisodes": { "sub": 535, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "3tuA75M4gMCsesjkY",
-          "name": "Du Shi Gu Xian Yi",
-          "availableEpisodes": { "sub": 54, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "rmrFGyCJXER4RkFM5",
-          "name": "Wujin Shenyu",
-          "availableEpisodes": { "sub": 70, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "zptH9eXuNhjuEwgZC",
-          "name": "Xianwu Zhuan 3",
-          "availableEpisodes": { "sub": 29, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "qCi9BjaQeLJtDxv3u",
-          "name": "Return of the Immortal",
-          "availableEpisodes": { "sub": 255, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "fsKP2asE4wMrTL7AQ",
-          "name": "Go! Go! Vehicle Zoo: Vehicle Star-hen",
-          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "8MnP4H462F7bfRZD7",
-          "name": "Bizarre Game: I Cleared It Using Billions of Merit Points",
-          "availableEpisodes": { "sub": 46, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "c3u6FjsPri8P72ktr",
-          "name": "I'm Stuck on the Same Day for a Thousand Years",
-          "availableEpisodes": { "sub": 45, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "ifJLnYTTi2NwsC7Tq",
-          "name": "Beast Mastery: Starting with the Classic of Mountains and Seas, I Conquer the World",
-          "availableEpisodes": { "sub": 26, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "HpM9TD4Zj2iAK5m8F",
-          "name": "Tu Bian Yingxiong X",
-          "availableEpisodes": { "sub": 1, "dub": 1, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "4ennbH6Y5qDz3kGNB",
-          "name": "Shoushimin Series Season 2",
-          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "krPwWcQMcHMG7uMRC",
-          "name": "UniteUp! Uni:Birth",
-          "availableEpisodes": { "sub": 12, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "9EfP64EBGyCKrpoxa",
-          "name": "Everyday Host",
-          "availableEpisodes": { "sub": 1, "dub": 0, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "cTE95q7tSed8Wjn22",
-          "name": "A-Rank Party wo Ridatsu shita Ore wa, Moto Oshiego-tachi to Meikyuu Shinbu wo Mezasu.",
-          "availableEpisodes": { "sub": 13, "dub": 10, "raw": 0 },
-          "__typename": "Show"
-        },
-        {
-          "_id": "C9pgfzyMgx2eP6Art",
-          "name": "Huo Feng Liao Yuan Season 2",
-          "availableEpisodes": { "sub": 13, "dub": 0, "raw": 0 },
           "__typename": "Show"
         }
       ]
