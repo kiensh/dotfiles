@@ -3,6 +3,7 @@ export EDITOR="nvim"
 export BROWSER="firefox"
 export ZDOTDIR="$HOME"
 export ZSH="$HOME/.zsh"
+export HISTSIZE=10000000
 mkdir -p "$ZSH"
 
 # Color for Linux
