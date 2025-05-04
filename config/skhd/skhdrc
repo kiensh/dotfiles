@@ -84,3 +84,5 @@ shift + cmd - 0 : yabai -m window --space 10;
 #ctrl + cmd - s : yabai --start-service
 shift + cmd - r : yabai --restart-service;
 
+cmd - o : /Users/kien/Downloads/.venv/bin/python ~/Downloads/switch_scene.py "Scene"
+shift + cmd - o : /Users/kien/Downloads/.venv/bin/python ~/Downloads/switch_scene.py "Scene 2"
