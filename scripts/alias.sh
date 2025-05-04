@@ -26,5 +26,5 @@ fi
 [[ $(command -v vifm) ]] && alias vf='vifm .'
 [[ $(command -v python3) ]] && alias py='python3'
 [[ $(command -v pip3) ]] && alias pi='pip3'
-[[ $(command -v webtorrent) ]] && alias web='webtorrent --not-on-top --no-quit --keep-seeding --mpv $(pbpaste)'
+[[ $(command -v webtorrent) ]] && alias torrent='webtorrent --not-on-top --no-quit --keep-seeding --mpv $(pbpaste)'
 
