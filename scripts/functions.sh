@@ -17,3 +17,7 @@ function y() {
     printf "\033[4 q" # change cursor style to underline steady
 }
 
+# Typing Test toipe
+function toipe() {
+}
+
