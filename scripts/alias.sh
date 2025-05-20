@@ -27,4 +27,6 @@ fi
 [[ $(command -v python3) ]] && alias py='python3'
 [[ $(command -v pip3) ]] && alias pi='pip3'
 [[ $(command -v webtorrent) ]] && alias tor=torrent torrent='webtorrent --not-on-top --mpv $(pbpaste)'
+[[ $(command -v yazi) ]] && alias y=yazi
+[[ $(command -v toipe) ]] && alias t='toipe --wordlist top2500'
 
