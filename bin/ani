@@ -329,6 +329,8 @@ play_episode() {
             ;;
         mpv*)
             if [ "$no_detach" = 0 ]; then
+                tput clear
+                printf "\33[2K\r\033[1;31mWatching episode %s...\033[0m\n" "$ep_no"
                 nohup "$player_function" $skip_flag --force-media-title="${allanime_title}Episode ${ep_no}" "$episode" >/dev/null 2>&1 &
             else
                 "$player_function" $skip_flag --force-media-title="${allanime_title}Episode ${ep_no}" "$episode"
@@ -369,9 +371,10 @@ play() {
         range=$(printf "%s\n" "$ep_list" | sed -nE "/^${start}\$/,/^${end}\$/p")
         [ -z "$range" ] && die "Invalid range!"
         for i in $range; do
-            tput clear
+            # tput clear
             ep_no=$i
-            printf "\33[2K\r\033[1;34mPlaying episode %s...\033[0m\n" "$ep_no"
+            # printf "\33[2K\r\033[1;34mPlaying episode %s...\033[0m\n" "$ep_no"
+            printf "\33[2K\r\033[34mFetching episode %s...\033[0m\n" "$ep_no"
             play_episode
         done
     else
