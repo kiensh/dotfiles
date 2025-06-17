@@ -1,17 +1,6 @@
 #!/bin/bash
 
-folders=" "
-folders+="$(dirname $HOME) $HOME $HOME/.config "
-folders+="$HOME/Workspaces "
-folders+="$HOME/Workspaces/personal "
-folders+="$HOME/Workspaces/HK6 "
-folders+="$HOME/Workspaces/HK7 "
-folders+="$HOME/Workspaces/HK8 "
-
-selected=$(find $folders -mindepth 1 -maxdepth 1 -type d | fzf)
-if [[ -z $selected ]]; then
-    exit 0
-fi
+selected="$(fzf_favorites || exit 0)"
 
 bn_selected=$(basename "$selected" | tr . _ | tr '[:upper:]' '[:lower:]')
 parent=$(dirname "$selected")
