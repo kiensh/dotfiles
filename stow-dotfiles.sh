@@ -11,8 +11,8 @@ for dir in config/*; do
     mkdir -pv $HOME/.config/$dir
 done
 
-stow -v --adopt --target $HOME home
-stow -v --adopt --target $HOME/.config config
-stow -v --adopt --target $HOME/scripts scripts
-stow -v --adopt --target $HOME/backup backup
-stow -v --adopt --target $HOME/.local/bin bin
+stow -v --no-folding --target $HOME home
+stow -v --no-folding --target $HOME/.config config
+stow -v --no-folding --target $HOME/scripts scripts
+stow -v --no-folding --target $HOME/backup backup
+stow -v --no-folding --target $HOME/.local/bin bin
