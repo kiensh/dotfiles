@@ -1,6 +1,9 @@
 #!/bin/bash
 
-selected_path="$(fzf_favorites || exit 0)"
+selected_path="$(fzf_favorites)"
+if [[ -z $selected_path ]]; then
+    exit 0
+fi
 
 selected_name=$(basename "$selected_path" | tr . _ | tr '[:upper:]' '[:lower:]')
 parent_path=$(dirname "$selected_path")
