@@ -1,42 +1,43 @@
 #!/bin/bash
 
-selected="$(fzf_favorites || exit 0)"
+selected_path="$(fzf_favorites || exit 0)"
 
-bn_selected=$(basename "$selected" | tr . _ | tr '[:upper:]' '[:lower:]')
-parent=$(dirname "$selected")
-bn_parent=$(basename "$parent" | tr . _ | tr '[:upper:]' '[:lower:]')
+selected_name=$(basename "$selected_path" | tr . _ | tr '[:upper:]' '[:lower:]')
+parent_path=$(dirname "$selected_path")
+parent_name=$(basename "$parent_path" | tr . _ | tr '[:upper:]' '[:lower:]')
 tmux_running=$(pgrep tmux)
 
 # create window instead of session
-attach_array=(
+attached_parent_names=(
     "$(basename $HOME)"
     "_config"
     "workspaces"
     "personal"
 )
+
 if [[
-    ${attach_array[@]} =~ "$bn_parent"
-    && ! ${attach_array[@]} =~ "$bn_selected"
+    ${attached_parent_names[@]} =~ "$parent_name"
+    && ! ${attached_parent_names[@]} =~ "$selected_name"
 ]]; then
-    if ! tmux has-session -t=$bn_parent 2> /dev/null; then
-        tmux new-session -ds $bn_parent -c $parent
+    if ! tmux has-session -t=$parent_name 2> /dev/null; then
+        tmux new-session -ds $parent_name -c $parent_path
     fi
-    target="$bn_parent:$bn_selected"
+    target="$parent_name:$selected_name"
     tmux switch-client -t $target || \
-        tmux neww -n $bn_selected -t "$bn_parent:" -c $selected && \
+        tmux neww -n $selected_name -t "$parent_name:" -c $selected_path && \
             tmux switch-client -t $target
     exit 0
 fi
 
 # create new session
 if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
-    tmux new-session -s $bn_selected -c $selected
+    tmux new-session -s $selected_name -c $selected_path
     exit 0
 fi
 
-if ! tmux has-session -t=$bn_selected 2> /dev/null; then
-    tmux new-session -ds $bn_selected -c $selected
+if ! tmux has-session -t $selected_name 2> /dev/null; then
+    tmux new-session -ds $selected_name -c $selected_path
 fi
 
 # switch client
-tmux switch-client -t $bn_selected
+tmux switch-client -t $selected_name
