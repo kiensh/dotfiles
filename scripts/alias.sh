@@ -1,4 +1,3 @@
-
 alias mpv-playlist="ls *.{mp4,mkv} | sort -V | mpv --playlist=-"
 alias v="vim"
 
@@ -8,8 +7,6 @@ alias ld='ls -l | grep "^d" | grep -v "total"'
 alias lf='ls -lp --color=always | grep -v "^d" | grep -v "total"'
 alias lh='ls -ld .*'
 alias ll='ls -lA | grep "^d" | grep -v "total" && ls -la | grep -v "^d" | grep -v "total"'
-# alias ll='ls -l'
-# alias lt='ls -ltr'
 if [ "$(command -v eza)" ]; then
     alias ld='eza -lD --show-symlinks'
     alias lf='eza -lf --show-symlinks'
@@ -29,4 +26,3 @@ fi
 [[ $(command -v webtorrent) ]] && alias tor=torrent torrent='webtorrent --not-on-top --mpv $(pbpaste)'
 [[ $(command -v yazi) ]] && alias y=yazi
 [[ $(command -v toipe) ]] && alias t='toipe --wordlist top2500'
-
