@@ -32,3 +32,6 @@ function _colima() { source <(colima completion zsh); }
 function _helm() { source <(helm completion zsh); }
 [[ $(command -v helm) ]] && compdef _helm helm
 
+# function _golang() { source "$ZSH/zsh-completions/src/_golang" }
+# [[ $(command -v go) ]] && compdef _golang go
+
