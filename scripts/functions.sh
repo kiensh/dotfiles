@@ -20,3 +20,13 @@ function toipe() {
 function j() {
     cd "$(fzf_favorites || pwd)"
 }
+
+# Update zsh plugins
+function update_zsh_plugins() {
+    for plugin_path in $ZSH/*/; do
+        if [[ -d $plugin_path/.git ]]; then
+            echo "Updating $(basename $plugin_path)..."
+            git -C $plugin_path pull --rebase --autostash
+        fi
+    done
+}
