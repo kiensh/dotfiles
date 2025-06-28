@@ -3,7 +3,7 @@ export EDITOR="nvim"
 export BROWSER="firefox"
 export ZDOTDIR="$HOME"
 export ZSH="$HOME/.zsh"
-export HISTSIZE=10000000
+export HISTSIZE=10000000 SAVEHIST=10000000
 mkdir -p "$ZSH"
 
 # Color for Linux
@@ -37,7 +37,6 @@ fi
 
 # jdk
 export JAVA_HOME="/Library/Java/JavaVirtualMachines/oracle-jdk-21.0.3"
-PATH+=":/Library/Java/JavaVirtualMachines/oracle-jdk-21.0.3/bin"
 export CPPFLAGS="-I/Library/Java/JavaVirtualMachines/oracle-jdk-21.0.3/include"
 
 # kubectl
