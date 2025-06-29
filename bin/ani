@@ -580,9 +580,9 @@ case "$search" in
         query=$(sed "s| |+|g" <<< $query)
         anime_list=$(search_anime "$query")
         [ -z "$anime_list" ] && die "No results found!"
-        [ -z "$index" ] \
-            && result=$(printf "%s" "$anime_list" | nl -w 1 | nth "Select anime: ") \
-            || result=$(printf "%s" "$anime_list" | sed -n "${index}p")
+        [ -n "$index" ] \
+            && result=$(printf "%s" "$anime_list" | sed -n "${index}p") \
+            || result=$(printf "%s" "$anime_list" | nl -w 1 | nth "Select anime: ")
         [ -z "$result" ] && exit 1
         title=$(printf "%s" "$result" | cut -f2)
         allanime_title="$(printf "%s" "$title" | cut -d'(' -f1 | tr -d '[:punct:]')"
