@@ -229,6 +229,17 @@ get_episode_url() {
 
 # search the query and give results
 search_anime() {
+    variables="{
+            \"search\":{
+                \"allowAdult\":true,
+                \"allowUnknown\":false,
+                \"query\":\"$1\"
+            },
+            \"limit\":40,
+            \"page\":1,
+            \"translationType\":\"$mode\",
+            \"countryOrigin\":\"ALL\"
+        }"
     search_gql="
         query(
             \$search: SearchInput
@@ -250,9 +261,18 @@ search_anime() {
                         }
                 }
         }"
-
-    curl -e "$allanime_refr" -s -G "${allanime_api}/api" --data-urlencode "variables={\"search\":{\"allowAdult\":false,\"allowUnknown\":false,\"query\":\"$1\"},\"limit\":40,\"page\":1,\"translationType\":\"$mode\",\"countryOrigin\":\"ALL\"}" --data-urlencode "query=$search_gql" -A "$agent" | sed 's|Show|\
-| g' | sed -nE "s|.*_id\":\"([^\"]*)\",\"name\":\"(.+)\",.*${mode}\":([1-9][^,]*).*|\1	\2 (\3 episodes)|p" | sed 's/\\"//g'
+    s_id="_id\":\"([^\"]*)\""
+    s_name="name\":\"(.+)\","
+    s_sub="sub\":([0-9][^,]*)"
+    s_dub="dub\":([0-9][^,]*)"
+    curl -e "$allanime_refr" -s -G "${allanime_api}/api" -A "$agent" --data-urlencode "variables=$variables" --data-urlencode "query=$search_gql" \
+    | sed 's|Show|\n|g' \
+    | sed -nE "s|.*$s_id.*$s_name.*$s_sub.*$s_dub.*|\1	\2 (\3 sub \4 dub)|p" \
+    | sed 's/\\"//g'
+# sample output:
+# k4rzW8gPRRDhyJ4Ht       Witch Watch (13 sub 10 dub)
+# iFP3ZATXM4EitBsXc       Uma Musume: Cinderella Gray (13 sub 0 dub)
+# 48LSqzbA9D6Bvhihf       Wushen Zhuzai (559 sub 0 dub)
 }
 
 time_until_next_ep() {
@@ -270,16 +290,44 @@ time_until_next_ep() {
 
 # get the episodes list of the selected anime
 episodes_list() {
+    mode=""
     episodes_list_gql="
-        query (\$showId: String!) {
+        query(\$showId: String!) {
             show(_id: \$showId) {
                 _id
                 availableEpisodesDetail
             }
         }"
 
-    curl -e "$allanime_refr" -s -G "${allanime_api}/api" --data-urlencode "variables={\"showId\":\"$*\"}" --data-urlencode "query=$episodes_list_gql" -A "$agent" | sed -nE "s|.*$mode\":\[([0-9.\",]*)\].*|\1|p" | sed 's|,|\
-|g; s|"||g' | sort -n -k 1
+    data=$(curl -e "$allanime_refr" -s -G "${allanime_api}/api" -A "$agent" \
+        --data-urlencode "variables={\"showId\":\"$*\"}" \
+        --data-urlencode "query=$episodes_list_gql")
+# sample output:
+# {"data":{"show":{"_id":"k4rzW8gPRRDhyJ4Ht","availableEpisodesDetail":{"sub":["13","12","11"
+# ,"10","9","8","7","6","5","4","3","2","1"],"dub":["10","9","8","7","6","5","4","3","2","1"]
+# ,"raw":[]}}}}
+    list_sub=$(printf "%s" "$data" \
+                | sed -nE "s|.*sub\":\[([0-9.\",]*)\].*|\1|p" \
+                | sed 's|,|\n|g; s|"||g' \
+                | sort -n -k 1)
+    list_dub=$(printf "%s" "$data" \
+                | sed -nE "s|.*dub\":\[([0-9.\",]*)\].*|\1|p" \
+                | sed 's|,|\n|g; s|"||g' \
+                | sort -n -k 1)
+    latest_sub=$([ -z "$list_sub" ] && echo 0 || printf "%s" "$list_sub" | tail -n1)
+    latest_dub=$([ -z "$list_dub" ] && echo 0 || printf "%s" "$list_dub" | tail -n1)
+    if [ $latest_sub -eq 0 ] && [ $latest_dub -eq 0 ]; then
+        echo "No episodes found for this anime."
+        exit 1
+    fi
+    [ $latest_sub -eq 0 ] && mode="dub"
+    [ $latest_dub -eq 0 ] && mode="sub"
+    [ -z "$mode" ] && mode="$(printf "sub (%s episodes)\ndub (%s episodes)" "$latest_sub" "$latest_dub" | nth "Select mode: " | cut -d " " -f1)"
+    if [ "$mode" == "dub" ]; then
+        printf "%s" "$list_dub"
+    else
+        printf "%s" "$list_sub"
+    fi
 }
 
 # PLAYING
@@ -518,9 +566,10 @@ case "$search" in
         ;;
     *)
         if [ "$use_external_menu" = "0" ]; then
-            while [ -z "$query" ]; do
-                printf "\33[2K\r\033[1;36mSearch anime: \033[0m" && read -r query
-            done
+            # while [ -z "$query" ]; do
+            #     printf "\33[2K\r\033[1;36mSearch anime: \033[0m" && read -r query
+            # done
+            query="$query"
         else
             [ -z "$query" ] && query=$(printf "" | external_menu "" "Search anime: " "$external_menu_args")
             [ -z "$query" ] && exit 1
@@ -528,11 +577,12 @@ case "$search" in
         # for checking new releases by specifying anime name
         [ "$search" = "nextep" ] && time_until_next_ep "$query"
 
-        query=$(printf "%s" "$query" | sed "s| |+|g")
+        query=$(sed "s| |+|g" <<< $query)
         anime_list=$(search_anime "$query")
         [ -z "$anime_list" ] && die "No results found!"
-        [ "$index" -eq "$index" ] 2>/dev/null && result=$(printf "%s" "$anime_list" | sed -n "${index}p")
-        [ -z "$index" ] && result=$(printf "%s" "$anime_list" | nl -w 2 | sed 's/^[[:space:]]//' | nth "Select anime: ")
+        [ -z "$index" ] \
+            && result=$(printf "%s" "$anime_list" | nl -w 1 | nth "Select anime: ") \
+            || result=$(printf "%s" "$anime_list" | sed -n "${index}p")
         [ -z "$result" ] && exit 1
         title=$(printf "%s" "$result" | cut -f2)
         allanime_title="$(printf "%s" "$title" | cut -d'(' -f1 | tr -d '[:punct:]')"
