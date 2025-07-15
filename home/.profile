@@ -44,3 +44,5 @@ if [ $(command -v kubectl) ]; then
     export KUBECONFIG="$HOME/.kube/config.yml"
 fi
 
+# node certs
+
