@@ -1,9 +1,13 @@
 alias gb='git branch'
-alias gc='git checkout'
+alias gbc='git_current_branch | tr -d "\n" | pbcopy'
+alias gc='branch=$(git_select_branch) && git checkout ${branch/origin\//}'
 alias gcb='git checkout -b'
+alias gm='branch=$(git_select_branch) && git merge $branch'
 alias gst='git status'
 alias gs='git stash'
+alias gsl='git stash list'
 alias gsp='git stash pop'
+alias gsd='git stash drop'
 alias ggl='git pull origin $(git_current_branch)'
 alias ggp='git push origin $(git_current_branch)'
 alias glg='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --stat'
@@ -41,3 +45,24 @@ function git_main_branch() {
     echo main
     return 1
 }
+
+function git_select_branch() {
+    local branches
+    branches=$(git branch --all | grep -v "HEAD" | sed 's/^[* ] //; s/remotes\///')
+    if [[ -z $branches ]]; then
+        echo "No branches found."
+        return 1
+    fi
+
+    local selected_branch
+    selected_branch=$(echo "$branches" | fzf --height=20% --reverse --cycle --border --prompt="Select branch: ")
+
+    if [[ -n $selected_branch ]]; then
+        echo "$selected_branch"
+    else
+        echo "No branch selected."
+        return 1
+    fi
+}
+
+
