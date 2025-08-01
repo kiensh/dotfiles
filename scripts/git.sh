@@ -1,8 +1,6 @@
-alias gb='git branch'
-alias gbc='git_current_branch | tr -d "\n" | pbcopy'
-alias gc='branch=$(git_select_branch) && git checkout ${branch/origin\//}'
+alias gb='copy $(git_current_branch)'
+alias gc='git checkout'
 alias gcb='git checkout -b'
-alias gm='branch=$(git_select_branch) && git merge $branch'
 alias gst='git status'
 alias gs='git stash'
 alias gsl='git stash list'
@@ -45,6 +43,24 @@ function git_main_branch() {
     echo main
     return 1
 }
+
+function copy() {
+    if [[ -z $1 ]]; then
+        echo "Usage: copy <branch_name>"
+        return 1
+    fi
+    local branch="$1"
+    echo "Copied: $branch" && echo $branch | tr -d "\n" | pbcopy
+}
+
+### Check if fzf is installed
+if (! command -v fzf &>/dev/null); then
+    return 0
+fi
+
+alias gb='copy $(git_select_branch)'
+alias gc='branch=$(git_select_branch) && git checkout ${branch/origin\//}'
+alias gm='branch=$(git_select_branch) && git merge $branch'
 
 function git_select_branch() {
     local branches
