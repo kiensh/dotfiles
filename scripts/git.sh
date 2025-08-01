@@ -80,5 +80,3 @@ function git_select_branch() {
         return 1
     fi
 }
-
-
