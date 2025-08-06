@@ -1,4 +1,5 @@
-alias gb='copy $(git_current_branch)'
+alias gb='git branch'
+alias gbc='copy $(git_current_branch)'
 alias gc='git checkout'
 alias gcb='git checkout -b'
 alias gst='git status'
@@ -8,6 +9,7 @@ alias gsp='git stash pop'
 alias gsd='git stash drop'
 alias ggl='git pull origin $(git_current_branch)'
 alias ggp='git push origin $(git_current_branch)'
+alias gm='git merge'
 alias glg='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --stat'
 alias glo='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --all'
 
@@ -58,9 +60,8 @@ if (! command -v fzf &>/dev/null); then
     return 0
 fi
 
-alias gb='copy $(git_select_branch)'
-alias gc='branch=$(git_select_branch) && git checkout ${branch/origin\//}'
-alias gm='branch=$(git_select_branch) && git merge $branch'
+alias gbc='copy $(git_select_branch)'
+alias gc='git checkout ${$(git_select_branch)/origin\//}'
 
 function git_select_branch() {
     local branches
