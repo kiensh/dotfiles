@@ -7,6 +7,7 @@ alias gs='git stash'
 alias ggl='git pull origin $(git_current_branch)'
 alias ggp='git push origin $(git_current_branch)'
 alias gm='git merge'
+alias gf='git fetch'
 alias glg='git log --graph --stat --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset"'
 
 alias gcd='git_checkout_delete'
