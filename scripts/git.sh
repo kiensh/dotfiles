@@ -1,19 +1,16 @@
 alias gb='git branch'
-alias gbc='copy $(git_current_branch)'
 alias gc='git checkout'
 alias gcb='git checkout -b'
+alias gcl='git clone'
 alias gst='git status'
 alias gs='git stash'
-alias gsl='git stash list'
-alias gsp='git stash pop'
-alias gsd='git stash drop'
 alias ggl='git pull origin $(git_current_branch)'
 alias ggp='git push origin $(git_current_branch)'
 alias gm='git merge'
-alias glg='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --stat'
-alias glo='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --all'
+alias glg='git log --graph --stat --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset"'
 
-function gcd() {
+alias gcd='git_checkout_delete'
+function git_checkout_delete() {
     current=$(git_current_branch)
     target=${1-$(git config --get branch.working || git_main_branch)}
 
@@ -46,38 +43,83 @@ function git_main_branch() {
     return 1
 }
 
-function copy() {
-    if [[ -z $1 ]]; then
-        echo "Usage: copy <branch_name>"
-        return 1
-    fi
-    local branch="$1"
-    echo "Copied: $branch" && echo $branch | tr -d "\n" | pbcopy
-}
-
 ### Check if fzf is installed
 if (! command -v fzf &>/dev/null); then
     return 0
 fi
 
-alias gbc='copy $(git_select_branch)'
-alias gc='git checkout ${$(git_select_branch)/origin\//}'
-
+alias gb='git_select_branch'
+alias gbr='git_select_branch remote'
 function git_select_branch() {
-    local branches
-    branches=$(git branch --all | grep -v "HEAD" | sed 's/^[* ] //; s/remotes\///')
-    if [[ -z $branches ]]; then
-        echo "No branches found."
-        return 1
-    fi
+    local mode=${1:-local}
+    local branches selected_branch
+    
+    case $mode in
+        local)
+            local branch_list=()
+            while IFS= read -r branch; do
+                branch=$(sed 's/^[* ]*//' <<< $branch)  # Remove leading '* ' or '  '
+                if git rev-parse --verify "origin/$branch" >/dev/null 2>&1; then
+                    local behind=$(git rev-list --count "$branch..origin/$branch" 2>/dev/null || echo "0")
+                    if [[ "$behind" == "0" ]]; then
+                        branch_list+=("$branch (up to date)")
+                    else
+                        branch_list+=("$branch (${behind} commits behind)")
+                    fi
+                else
+                    branch_list+=("$branch (no remote)")
+                fi
+            done < <(git branch)
+            
+            branches=$(printf '%s\n' "${branch_list[@]}")
+            ;;
+        remote)
+            branches=$(git branch -r | grep -v "HEAD" | sed 's/^[* ] //; s/remotes\///')
+            ;;
+        all)
+            branches=$(git branch -a | grep -v "HEAD" | sed 's/^[* ] //; s/remotes\///')
+            ;;
+        *)
+            echo "Usage: git_select_branch [local|remote|all]" >&2
+            return 1
+            ;;
+    esac
+    
+    [[ -z "$branches" ]] && { echo "No branches found." >&2; return 1; }
 
-    local selected_branch
-    selected_branch=$(echo "$branches" | fzf --height=20% --reverse --cycle --border --prompt="Select branch: ")
-
-    if [[ -n $selected_branch ]]; then
+    selected_branch=$(echo "$branches" | fzf --height=20% --reverse --cycle --border --prompt="Select branch: " | awk '{print $1}')
+    
+    if [[ -n "$selected_branch" ]]; then
+        echo "$selected_branch" | tr -d '\n' | pbcopy
         echo "$selected_branch"
     else
-        echo "No branch selected."
+        echo "No branch selected." >&2
         return 1
     fi
 }
+
+alias gc='git_select_checkout'
+alias gcr='git_select_checkout remote'
+function git_select_checkout() {
+    mode=${1:-local}
+    local branch
+    branch=$(git_select_branch "$mode") || return 1
+    git checkout "${branch/origin\//}"
+}
+
+alias gff='git_fast_forward_branch'
+function git_fast_forward_branch() {
+    local branch remote_branch
+    branch="$(git_select_branch local)" || return 1
+    remote_branch="origin/$branch"
+    
+    # Check if remote branch exists
+    if ! git rev-parse --verify "$remote_branch" >/dev/null 2>&1; then
+        echo "✗ Remote branch '$remote_branch' does not exist"
+        return 1
+    fi
+    
+    # Fast-forward the local branch to match remote
+    git branch -f "$branch" "$remote_branch"
+}
+
