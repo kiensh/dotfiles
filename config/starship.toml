@@ -1,0 +1,79 @@
+format = """
+$os\
+$username\
+$directory\
+$git_branch\
+$git_status\
+$character\
+"""
+
+# Disable the blank line at the start of the prompt
+add_newline = true
+
+[character]
+success_symbol = '[ ](fg:#674ea7) '
+error_symbol = '[✗ ](bold red) '
+vimcmd_symbol = '[ ](bold green) '
+
+# You can also replace your username with a neat symbol like   or disable this
+# and use the os module below
+[username]
+show_always = true
+format = "[$user ]($style)"
+disabled = true
+
+# An alternative to the username module which displays a symbol that
+# represents the current operating system
+[os]
+disabled = true
+format = "[$symbol]($style)"
+[os.symbols]
+Arch = "󰣇 "
+Macos = " "
+Ubuntu = " "
+Unknown = " "
+Windows = " "
+
+[directory]
+format = "[$path]($style) "
+truncation_length = 2
+truncation_symbol = "…/"
+
+# Here is how you can shorten some long paths by text replacement
+# similar to mapped_locations in Oh My Posh:
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+"Workspaces" = " "
+".config" = " "
+# Keep in mind that the order matters. For example:
+# "Important Documents" = " 󰈙 "
+# will not be replaced, because "Documents" was already substituted before.
+# So either put "Important Documents" before "Documents" or use the substituted version:
+# "Important 󰈙 " = " 󰈙 "
+
+[git_branch]
+symbol = " "
+format = "[$symbol$branch ]($style)"
+
+[git_status]
+format = "[$all_status$ahead_behind]($style) "
+conflicted = "="
+stashed = "[$count](#3d85c6)"
+deleted = "[✘$count](#f08080)"
+renamed = "[»$count](#86BBD8)"
+modified = "[!$count](#7fb2b2)"
+staged = "[+$count](#86BBD8)"
+untracked = "[?$count](#9cd26d)"
+ahead = '⇡$count'
+diverged = '⇕⇡$ahead_count⇣$behind_count '
+behind = '⇣$count'
+
+[conda]
+symbol = "🅒 "
+format = "[$symbol$environment]($style) "
+style = "bold green"
+ignore_base = true
+

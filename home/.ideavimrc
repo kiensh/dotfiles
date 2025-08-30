@@ -1,0 +1,118 @@
+" search for actions: :actionlist <pattern>
+
+
+set number relativenumber
+set hlsearch
+set incsearch
+set ignorecase smartcase
+set scrolloff=8 sidescrolloff=60 colorcolumn=60
+set foldmethod=indent
+set nocursorline cursorlineopt=number
+set visualbell
+
+
+
+""" Mappings
+
+let mapleader = " "
+" inoremap jk <ESC>
+
+nmap <C-s> :w<CR>
+nmap <leader>nh :nohl<CR>
+nmap <leader>q <action>(CloseEditor)
+nmap Q <action>(CloseAllEditorsButActive)
+
+" move cursor
+nnoremap <C-d> <C-d>zz
+nnoremap <C-u> <C-u>zz
+
+inoremap <C-j> <Down>
+inoremap <C-k> <Up>
+
+" yank, paste
+"vnoremap <leader>y "+y
+noremap <leader>y "+y
+nnoremap <leader>p "+p
+nnoremap <leader>P "+P
+vnoremap <leader>p "_d"+P
+vnoremap p "_dP
+
+" Lines
+map <M-j> <action>(MoveLineDown)
+map <M-k> <action>(MoveLineUp)
+vmap > >gv
+vmap < <gv
+
+" window
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-h> <C-w>h
+nnoremap <C-l> <C-w>l
+sethandler <C-l> n:vim i:ide "copilot completion in insert mode
+
+" screen
+nmap <leader>sv <action>(SplitVertically)
+nmap <leader>sh <action>(SplitHorizontally)
+nmap <leader>sx <action>(Unsplit)
+
+" Find and replace
+map <leader>rp <action>(Replace)
+
+" Go to
+nmap ]d <action>(GotoNextError)
+nmap [d <action>(GotoPreviousError)
+nmap gD <action>(GotoDefinition)
+nmap gd <action>(GotoDeclaration)
+nmap gt <Action>(GotoTypeDeclaration)
+nmap gi <action>(GotoImplementation)
+nmap gr <action>(ShowUsages)
+
+" Debug
+nmap <leader>b <action>(ToggleLineBreakpoint)
+
+" Actions
+nmap <leader>ca <action>(ShowIntentionActions)
+nmap <leader>di <action>(ShowErrorDescription)
+nmap <leader>rn <action>(RenameElement)
+nmap <leader>ff <action>(GotoFile)
+nmap <leader>fc <action>(GotoClass)
+nmap <leader>fs <action>(FindInPath)
+nmap <leader>fa <action>(GotoAction)
+nmap <leader>fm <action>(ReformatCode)
+nmap <leader>i <action>(Generate)
+
+nmap ]h <action>(VcsShowNextChangeMarker)
+nmap [h <action>(VcsShowPrevChangeMarker)
+nmap <leader>hx <action>(Vcs.RollbackChangedLines)
+nmap <leader>hd <action>(VcsShowCurrentChangeMarker)
+nmap <leader>hh <action>(Vcs.ShowDiffChangedLines)
+
+
+
+"""" Plugins
+set ideajoin
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-surround'
+
+" NERDTree
+Plug 'preservim/nerdtree'
+let g:NERDTreeFileLines = 1
+let g:NERDTreeMapActivateNode="l"
+let g:NERDTreeMapPreview="<Tab>"
+let g:NERDTreeMapJumpParent="h"
+let g:NERDTreeMapOpenSplit="X"
+let g:NERDTreeMapOpenVSplit="V"
+
+" vim-multiple-cursors
+Plug 'terryma/vim-multiple-cursors'
+nmap <C-n> <Plug>NextWholeOccurrence
+xmap <C-n> <Plug>NextWholeOccurrence
+nmap g<C-n> <Plug>NextOccurrence
+xmap g<C-n> <Plug>NextOccurrence
+xmap <C-q> <Plug>SkipOccurrence
+xmap <C-p> <Plug>RemoveOccurrence
+
+" vim-highlightedyank
+Plug 'machakann/vim-highlightedyank'
+let g:highlightedyank_highlight_duration = 100
+let g:highlightedyank_highlight_color = "rgba(25, 200, 230, 255)"

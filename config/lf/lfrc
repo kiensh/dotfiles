@@ -28,8 +28,8 @@ map ` !true
 
 # execute current file (must be executable)
 # change to remove
-cmd trash %[ ${2-y} = "y" ] && gio trash $fx
-map d push :trash<space>([y]/n)<space>
+cmd trash %[ ${2-y} = "y" ] && trash -v $fx
+map T push :trash<space>([y]/n)<space>
 
 cmd remove %[ ${2-y} = "y" ] && rm -rv $fx
 map D push :remove<space>([y]/n)<space>
@@ -39,26 +39,25 @@ map x cut
 # This command is called when current file is not a directory. You may want to
 # use either file extensions and/or mime types here. Below uses an editor for
 # text files and a file opener for the rest.
-cmd open &{{
-    case $(file --mime-type -Lb $f) in
-        text/*) lf -remote "send $id \$$EDITOR \$fx";;
-        # application/*) lf -remote "send $id \$\$fx";;
-        *) for f in $fx; do $OPENER $f > /dev/null 2> /dev/null & done;;
+cmd my-open &{{
+    case $(echo "$HOME") in
+        # /home/*) ;;
+        /Users/*) open -R $f;;
+        *) echo "$f";;
     esac
 }}
 # dedicated keys for file opener actions
-map o open
+map o my-open
 
 # mkdir command. See wiki if you want it to select created dir
-map a :push %mkdir<space>-p<space>
+map d :push %mkdir<space>-p<space>
 
 # define a custom 'rename' command without prompt for overwrite
 cmd rename %[ -e $1 ] && printf "file exists" || mv -v $f $1
-map r push :rename<space>
 cmd rename_ui &{{
     # file=$(echo $f | tr " " "<space>")
     file=${f// /<space>}
-    lf -remote "send $id push :rename<space>$file"
+    lf -remote "send $id push :rename<space>'$file'<left>"
 }}
 map r rename_ui
 
@@ -111,17 +110,20 @@ cmd tar ${{
 }}
 
 # compress current file or selected files with zip
-cmd zip %{{
-    zip -rv $f.zip $f
+cmd zip ${{
+    name=${1-$(basename $f)}
+    zip -rv $name.zip $name
 }}
 map zz push :zip<space>
 
 # Movement
 map gd cd ~/Downloads
+map gD cd ~/Documents
 map gc cd ~/.config
-map gl cd /run/media/learning
-map gh cd /run/media/learning/CLASS/HK5
-map gm cd /run/media
+map gw cd ~/Workspaces
+# map gl cd /run/media/learning
+map gh cd ~/Workspaces/HK6
+# map gm cd /run/media
 
 # fzf
 cmd fzf_jump ${{
@@ -146,7 +148,7 @@ cmd create-tmux-session %{{
     tmux new -s $lowercase -d
     echo "created tmux session '$lowercase'"
 }}
-map s push :create-tmux-session<space>
+# map s push :create-tmux-session<space>
 
 cmd create-tmux-window %{{
     name=${1-$(basename $(dirname $f))}
@@ -154,19 +156,22 @@ cmd create-tmux-window %{{
     tmux new-window -n $name -d
     echo "created tmux window '$name'"
 }}
-map w push :create-tmux-window<space>
+# map w push :create-tmux-window<space>
 
 # copy path to clipboard
 cmd copy-path &{{
-    # echo -n $f | xclip -selection primary
-    echo -n $f | xclip -selection clipboard
+    case $(echo "$HOME") in
+        /home/*) echo -n "$f" | xclip -selection clipboard;;
+        /Users/*) echo "$f" | pbcopy;;
+        *) echo "$f" | Set-Clipboard;;
+    esac
     lf -remote "send $id %echo \"copied path: '$f'\""
 }}
-map <a-c> copy-path
+map ç copy-path
 
 # drap and drop
 cmd drag-drop %dragon-drop -a $fx
-map <a-d> drag-drop
+# map <a-d> drag-drop
 
 # select-all
 cmd select-all :unselect; invert
@@ -174,7 +179,7 @@ cmd toggle-select-all &{{
     [[ ! -z $fs ]] && cmd='unselect' || cmd='invert'
     lf -remote "send $id $cmd"
 }}
-map <a-a> toggle-select-all 
+map å toggle-select-all 
 
 # info
 cmd info &{{
@@ -182,7 +187,22 @@ cmd info &{{
 }}
 
 cmd get-size ${{
-    df -h | grep "Use\|home\|media"
+    echo "Getting Size... '$(dirname $f)'"
+    # df -h | grep "Use\|home\|media"
+    lines=$(tput lines)
+    du -a --si . | sort -h | tail -n $lines
+    echo "Dir: '$(dirname $f)'"
+    df -H ~ .
     read
 }}
-map S get-size
+map S push :get-size<space>20
+
+cmd play-mpv ${{
+    ls *.{mp4,mkv} | sort -V | mpv --playlist=-
+}}
+map P :push :play-mpv<space>
+
+cmd anime ${{
+    webtorrent "$(pbpaste)" --mpv --player-args="--volume=90"
+}}
+map A anime

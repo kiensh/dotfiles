@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "Getting Size... '$(dirname $1)'"
+du -a --si . | sort -h | tail -n $(tput lines)
+echo "Dir: '$(dirname $1)'"
+df -H ~ .
+

@@ -1,36 +1,47 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
-if [[ $# -eq 1 ]]; then
-    selected=$1
-else
-    folders="/home /home/uit/.config /run/media/learning/CLASS/HK5 /run/media/learning /run/media/learning/code "
-    selected=$(find $folders -mindepth 1 -maxdepth 1 -type d | fzf)
-    if [[ -z $selected ]]; then
-        exit 0
-    fi
+selected_path="$(fzf_favorites)"
+if [[ -z $selected_path ]]; then
+    exit 0
 fi
 
-
-selected_name=$(basename "$selected" | tr . _ | tr '[:upper:]' '[:lower:]')
+selected_name=$(basename "$selected_path" | tr . _ | tr '[:upper:]' '[:lower:]')
+parent_path=$(dirname "$selected_path")
+parent_name=$(basename "$parent_path" | tr . _ | tr '[:upper:]' '[:lower:]')
 tmux_running=$(pgrep tmux)
-parent=$(dirname "$selected")
 
-if [[ $parent == "/home/uit/.config" ]]; then
-    parent_name=$(basename "$parent" | tr . _ | tr '[:upper:]' '[:lower:]')
+# create window instead of session
+attached_parent_names=(
+    "$(basename $HOME)"
+    "_config"
+    "workspaces"
+    "personal"
+)
+
+if [[
+    ${attached_parent_names[@]} =~ "$parent_name"
+    && ! ${attached_parent_names[@]} =~ "$selected_name"
+]]; then
+    if ! tmux has-session -t=$parent_name 2> /dev/null; then
+        tmux new-session -ds $parent_name -c $parent_path
+    fi
     target="$parent_name:$selected_name"
-    tmux switch-client -t $target || \
-        tmux neww -n $selected_name -t "$parent_name:" -c $selected && \
-        tmux switch-client -t $target
+    if ! tmux has-session -t $target 2> /dev/null; then
+        tmux new-window -d -n $selected_name -t "$parent_name:" -c $selected_path
+    fi
+    tmux switch-client -t $target
     exit 0
 fi
 
+# create new session
 if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
-    tmux new-session -s $selected_name -c $selected
+    tmux new-session -s $selected_name -c $selected_path
     exit 0
 fi
 
-if ! tmux has-session -t=$selected_name 2> /dev/null; then
-    tmux new-session -ds $selected_name -c $selected
+if ! tmux has-session -t $selected_name 2> /dev/null; then
+    tmux new-session -ds $selected_name -c $selected_path
 fi
 
+# switch client
 tmux switch-client -t $selected_name
