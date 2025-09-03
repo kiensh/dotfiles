@@ -3,8 +3,8 @@
 # Ensure you have a clean working directory
 git filter-branch -f --env-filter \
 '
-CORRECT_NAME="kien2346"
-CORRECT_EMAIL="91678288+kien2346@users.noreply.github.com"
+CORRECT_NAME="kiensh"
+CORRECT_EMAIL="91678288+kiensh@users.noreply.github.com"
 if [ "$GIT_COMMITTER_EMAIL" != "$CORRECT_EMAIL" ]
 then
     export GIT_COMMITTER_NAME="$CORRECT_NAME"
