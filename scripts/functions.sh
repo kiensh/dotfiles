@@ -1,3 +1,8 @@
+# cd backward shortcuts
+function ..() { cd ..; }
+function ...() { cd ../..; }
+function ....() { cd ../../..; }
+
 # Test Your Shell Load Time
 function time-shell() {
     shell=${1-$SHELL}
