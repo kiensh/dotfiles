@@ -28,6 +28,10 @@ function j() {
 
 # Update zsh plugins
 function update_zsh_plugins() {
+    if [[ -z $ZSH ]]; then
+        echo "ZSH variable is not set."
+        return 1
+    fi
     for plugin_path in $ZSH/*/; do
         if [[ -d $plugin_path/.git ]]; then
             echo "Updating $(basename $plugin_path)..."
