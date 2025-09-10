@@ -25,6 +25,14 @@ function toipe() {
 function j() {
     cd "$(fzf_favorites || pwd)"
 }
+function J() {
+    dirs=$(find . -mindepth 1 -maxdepth 4 -type d)
+    if [[ -z $dirs ]]; then
+        echo "No directories found in the specified paths."
+        return 1
+    fi
+    cd "$(echo "$dirs" | fzf --height 40% --reverse --border || pwd)"
+}
 
 # Update zsh plugins
 function update_zsh_plugins() {
