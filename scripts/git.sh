@@ -44,6 +44,59 @@ function git_main_branch() {
     return 1
 }
 
+function git_commit_amend() {
+    # parse options using for loop to get new date, message if provided
+    local new_date message
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+        -d|--date)
+            if [[ -z "$2" ]]; then
+                echo "Error: --date requires a value" >&2
+                return 1
+            fi
+            new_date="$2"
+            shift 2
+            ;;
+        -m|--message)
+            if [[ -z "$2" ]]; then
+                echo "Error: --message requires a value" >&2
+                return 1
+            fi
+            message="$2"
+            shift 2
+            ;;
+        *)
+            echo "Usage: git_commit_amend [-d|--date <new_date>] [-m|--message <new_message>]" >&2
+            return 1
+            ;;
+        esac
+    done
+
+    yellow='\033[1;33m'
+    green='\033[1;32m'
+    reset='\033[0m'
+    if [[ -n "$new_date" && -n "$message" ]]; then
+        old_date=$(git log -1 --format="%cd")
+        old_message=$(git log -1 --format="%s")
+        GIT_COMMITTER_DATE="$new_date" git commit --amend -m "$message" --date "$new_date"
+        echo "Updated from ${yellow}${old_date}${reset} to $green${new_date}$reset"
+        echo "Updated from ${yellow}${old_message}${reset} to $green${message}$reset"
+        return 0
+    fi
+    if [[ -n "$message" ]]; then
+        old_message=$(git log -1 --format="%s")
+        git commit --amend --no-edit -m "$message"
+        echo "Updated from ${yellow}${old_message}${reset} to $green${message}$reset"
+        return 0
+    fi
+    if [[ -n "$new_date" ]]; then
+        old_date=$(git log -1 --format="%cd")
+        GIT_COMMITTER_DATE="$new_date" git commit --amend --no-edit --date "$new_date"
+        echo "Updated from ${yellow}${old_date}${reset} to $green${new_date}$reset"
+        return 0
+    fi
+}
+
 ### Check if fzf is installed
 if (! command -v fzf &>/dev/null); then
     return 0
@@ -54,42 +107,45 @@ alias gbr='git_select_branch remote'
 function git_select_branch() {
     local mode=${1:-local}
     local branches selected_branch
-    
+
     case $mode in
-        local)
-            local branch_list=()
-            while IFS= read -r branch; do
-                branch=$(sed 's/^[* ]*//' <<< $branch)  # Remove leading '* ' or '  '
-                if git rev-parse --verify "origin/$branch" >/dev/null 2>&1; then
-                    local behind=$(git rev-list --count "$branch..origin/$branch" 2>/dev/null || echo "0")
-                    if [[ "$behind" == "0" ]]; then
-                        branch_list+=("$branch (up to date)")
-                    else
-                        branch_list+=("$branch (${behind} commits behind)")
-                    fi
+    local)
+        local branch_list=()
+        while IFS= read -r branch; do
+            branch=$(sed 's/^[* ]*//' <<<$branch) # Remove leading '* ' or '  '
+            if git rev-parse --verify "origin/$branch" >/dev/null 2>&1; then
+                local behind=$(git rev-list --count "$branch..origin/$branch" 2>/dev/null || echo "0")
+                if [[ "$behind" == "0" ]]; then
+                    branch_list+=("$branch (up to date)")
                 else
-                    branch_list+=("$branch (no remote)")
+                    branch_list+=("$branch (${behind} commits behind)")
                 fi
-            done < <(git branch)
-            
-            branches=$(printf '%s\n' "${branch_list[@]}")
-            ;;
-        remote)
-            branches=$(git branch -r | grep -v "HEAD" | sed 's/^[* ] //; s/remotes\///')
-            ;;
-        all)
-            branches=$(git branch -a | grep -v "HEAD" | sed 's/^[* ] //; s/remotes\///')
-            ;;
-        *)
-            echo "Usage: git_select_branch [local|remote|all]" >&2
-            return 1
-            ;;
+            else
+                branch_list+=("$branch (no remote)")
+            fi
+        done < <(git branch)
+
+        branches=$(printf '%s\n' "${branch_list[@]}")
+        ;;
+    remote)
+        branches=$(git branch -r | grep -v "HEAD" | sed 's/^[* ] //; s/remotes\///')
+        ;;
+    all)
+        branches=$(git branch -a | grep -v "HEAD" | sed 's/^[* ] //; s/remotes\///')
+        ;;
+    *)
+        echo "Usage: git_select_branch [local|remote|all]" >&2
+        return 1
+        ;;
     esac
-    
-    [[ -z "$branches" ]] && { echo "No branches found." >&2; return 1; }
+
+    [[ -z "$branches" ]] && {
+        echo "No branches found." >&2
+        return 1
+    }
 
     selected_branch=$(echo "$branches" | fzf --height=20% --reverse --cycle --border --prompt="Select branch: " | awk '{print $1}')
-    
+
     if [[ -n "$selected_branch" ]]; then
         echo "$selected_branch" | tr -d '\n' | pbcopy
         echo "$selected_branch"
@@ -113,14 +169,13 @@ function git_fast_forward_branch() {
     local branch remote_branch
     branch="$(git_select_branch local)" || return 1
     remote_branch="origin/$branch"
-    
+
     # Check if remote branch exists
     if ! git rev-parse --verify "$remote_branch" >/dev/null 2>&1; then
         echo "✗ Remote branch '$remote_branch' does not exist"
         return 1
     fi
-    
+
     # Fast-forward the local branch to match remote
     git branch -f "$branch" "$remote_branch"
 }
-
