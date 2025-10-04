@@ -184,5 +184,6 @@ function git_fast_forward_branch() {
     fi
 
     # Fast-forward the local branch to match remote
-    git branch -f "$branch" "$remote_branch"
+    git branch -f "$branch" "$remote_branch" 2> /dev/null \
+        || git pull origin "$branch"
 }
