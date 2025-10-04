@@ -103,8 +103,6 @@ if (! command -v fzf &>/dev/null); then
     return 0
 fi
 
-alias gb='git_select_branch'
-alias gbr='git_select_branch remote'
 function git_select_branch() {
     local mode=${1:-local}
     local branches selected_branch
@@ -148,12 +146,20 @@ function git_select_branch() {
     selected_branch=$(echo "$branches" | fzf --height=20% --reverse --cycle --border --prompt="Select branch: " | awk '{print $1}')
 
     if [[ -n "$selected_branch" ]]; then
-        echo "$selected_branch" | tr -d '\n' | pbcopy
         echo "$selected_branch"
     else
         echo "No branch selected." >&2
         return 1
     fi
+}
+
+alias gbc='git_select_branch_copy'
+function git_select_branch_copy() {
+    local mode=${1:-local}
+    local branch
+    branch=$(git_select_branch "$mode") || return 1
+    echo -n "$branch" | tr -d '\n' | pbcopy
+    echo "Branch '$branch' copied to clipboard."
 }
 
 alias gc='git_select_checkout'
