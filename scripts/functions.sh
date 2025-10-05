@@ -42,7 +42,9 @@ function update_zsh_plugins() {
     fi
     for plugin_path in $ZSH/*/; do
         if [[ -d $plugin_path/.git ]]; then
-            echo "Updating $(basename $plugin_path)..."
+            local GREEN='\033[0;32m'
+            local NC='\033[0m'
+            echo "${GREEN}Updating \"$(basename $plugin_path)\"...${NC}"
             git -C $plugin_path pull --rebase --autostash
         fi
     done
