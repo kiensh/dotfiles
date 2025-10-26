@@ -20,6 +20,7 @@ let mapleader = " "
 nmap <C-s> :w<CR>
 nmap <leader>nh :nohl<CR>
 nmap <leader>q <action>(CloseEditor)
+nmap <leader>q :bdelete<CR>
 nmap Q <action>(CloseAllEditorsButActive)
 
 " move cursor
@@ -46,7 +47,7 @@ vmap < <gv
 " window
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
-nnoremap <C-h> <C-w>h
+noremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
 sethandler <C-l> n:vim i:ide "copilot completion in insert mode
 
@@ -78,14 +79,17 @@ nmap <leader>ff <action>(GotoFile)
 nmap <leader>fc <action>(GotoClass)
 nmap <leader>fs <action>(FindInPath)
 nmap <leader>fa <action>(GotoAction)
-nmap <leader>fm <action>(ReformatCode)
+nmap <leader>fm <action>(ReformatCode) <action>(ReformatWithPrettierAction)
 nmap <leader>i <action>(Generate)
 
-nmap ]h <action>(VcsShowNextChangeMarker)
-nmap [h <action>(VcsShowPrevChangeMarker)
+nmap ]h <action>(NextDiff) <action>(VcsShowNextChangeMarker)
+nmap [h <action>(PreviousDiff) <action>(VcsShowPrevChangeMarker)
 nmap <leader>hx <action>(Vcs.RollbackChangedLines)
 nmap <leader>hd <action>(VcsShowCurrentChangeMarker)
+nmap <leader>hp <action>(VcsShowCurrentChangeMarker)
 nmap <leader>hh <action>(Vcs.ShowDiffChangedLines)
+nmap <leader>hs <action>(Diff.ApplyRightSide)
+nmap <leader>hu <action>(Diff.ApplyLeftSide)
 
 
 
@@ -116,3 +120,8 @@ xmap <C-p> <Plug>RemoveOccurrence
 Plug 'machakann/vim-highlightedyank'
 let g:highlightedyank_highlight_duration = 100
 let g:highlightedyank_highlight_color = "rgba(25, 200, 230, 255)"
+
+" HarpoonIJ
+
+" Harpooner
+
