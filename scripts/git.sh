@@ -162,8 +162,9 @@ function git_select_branch_copy() {
     echo "Branch '$branch' copied to clipboard."
 }
 
-alias gC='git_select_checkout'
-alias gCr='git_select_checkout remote'
+alias gC='git checkout'
+alias gc='git_select_checkout'
+alias gcr='git_select_checkout remote'
 function git_select_checkout() {
     mode=${1:-local}
     local branch
