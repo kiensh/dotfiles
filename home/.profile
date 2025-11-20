@@ -44,5 +44,9 @@ if [ $(command -v kubectl) ]; then
     export KUBECONFIG="$HOME/.kube/config.yml"
 fi
 
-# node certs
+# golang
+if [ $(command -v go) ]; then
+    GOPATH="$(go env GOPATH)"
+    PATH+=":$GOPATH/bin"
+fi
 
