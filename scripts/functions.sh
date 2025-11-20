@@ -4,7 +4,7 @@ function ...() { cd ../..; }
 function ....() { cd ../../..; }
 
 # Test Your Shell Load Time
-function time-shell() {
+function time_shell() {
     shell=${1-$SHELL}
     for i in $(seq 1 10); do /usr/bin/time $shell -i -c exit; done
 }
@@ -48,4 +48,19 @@ function update_zsh_plugins() {
             git -C $plugin_path pull --rebase --autostash
         fi
     done
+}
+
+# kill port
+function kill_port() {
+    if [ -z "$1" ]; then
+        echo "Usage: kill_port <port_number>"
+        return 1
+    fi
+    # check if port is in use or not
+    if ! lsof -i tcp:$1 >/dev/null; then
+        echo "Port $1 is not in use."
+        return 0
+    fi
+    lsof -i tcp:$1 | awk 'NR>1 {print $2}' | xargs kill -9
+    echo "Successfully killed port $1."
 }
