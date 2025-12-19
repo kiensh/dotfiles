@@ -50,3 +50,5 @@ if [ $(command -v go) ]; then
     PATH+=":$GOPATH/bin"
 fi
 
+# Environment
+[ -f "$HOME/.env" ] && source "$HOME/.env"
