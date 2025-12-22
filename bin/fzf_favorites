@@ -9,6 +9,7 @@ list_dir=(
     "$HOME/Workspaces/Personal"
     "$HOME/Workspaces/Projects"
     "$HOME/Workspaces/School"
+    "$HOME/Workspaces/Working"
 )
 
 find "${list_dir[@]}" -mindepth 1 -maxdepth 1 -type d | fzf --height 40% --reverse --border
