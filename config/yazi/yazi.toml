@@ -25,7 +25,6 @@ cache_dir       = ""
 image_delay     = 30
 image_filter    = "triangle"
 image_quality   = 75
-sixel_fraction  = 15
 ueberzug_scale  = 1
 ueberzug_offset = [ 0, 0, 0, 0 ]
 
@@ -63,7 +62,7 @@ play-folder = [
 [open]
 rules = [
   # Folder
-  { name = "*/", use = [ "edit", "open", "play-folder", "reveal" ] },
+  { url = "*/", use = [ "edit", "open", "play-folder", "reveal" ] },
   # Text
   { mime = "text/*", use = [ "edit", "reveal" ] },
   # Image
@@ -79,7 +78,7 @@ rules = [
   # Empty file
   { mime = "inode/x-empty", use = [ "edit", "reveal" ] },
   # Fallback
-  { name = "*", use = [ "open", "reveal" ] },
+  { url = "*", use = [ "open", "reveal" ] },
 ]
 
 [tasks]
@@ -94,7 +93,7 @@ suppress_preload = false
 
 fetchers = [
   # Mimetype
-  { id = "mime", name = "*", run = "mime", if = "!mime", prio = "high" },
+  { id = "mime", url = "*", run = "mime.local", if = "!mime", prio = "high" },
 ]
 preloaders = [
   # Image
@@ -109,7 +108,7 @@ preloaders = [
   { mime = "application/vnd.ms-opentype", run = "font" },
 ]
 previewers = [
-  { name = "*/", run = "folder", sync = true },
+  { url = "*/", run = "folder", sync = true },
   # Code
   { mime = "text/*", run = "code" },
   { mime = "*/{xml,javascript,x-wine-extension-ini}", run = "code" },
@@ -131,7 +130,7 @@ previewers = [
   # Empty file
   { mime = "inode/x-empty", run = "empty" },
   # Fallback
-  { name = "*", run = "file" },
+  { url = "*", run = "file" },
 ]
 
 [input]
@@ -195,7 +194,7 @@ quit_content = "The following task is still running, are you sure you want to qu
 quit_origin  = "center"
 quit_offset  = [ 0, 0, 50, 15 ]
 
-[select]
+[pick]
 open_title  = "Open with:"
 open_origin = "hovered"
 open_offset = [ 0, 1, 50, 7 ]
