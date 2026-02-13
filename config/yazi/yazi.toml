@@ -91,10 +91,12 @@ suppress_preload = false
 
 [plugin]
 
-fetchers = [
-  # Mimetype
-  { id = "mime", url = "*", run = "mime.local", if = "!mime", prio = "high" },
-]
+# DO NOT ENABLE "fetchers"
+# It will break previewing for directory
+# fetchers = [
+#   # Mimetype
+#   { id = "mime", url = "*", run = "mime.local", if = "!mime", prio = "high" },
+# ]
 preloaders = [
   # Image
   { mime = "image/{avif,hei?,jxl,svg+xml}", run = "magick" },
