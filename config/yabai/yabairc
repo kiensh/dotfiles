@@ -4,15 +4,21 @@ yabai -m config layout bsp
 # new window spawns to the right if vertical split, or bottom if horizontal split
 yabai -m config window_placement second_child
 
-# padding set to 10px
-yabai -m config top_padding 0
-yabai -m config bottom_padding 0
-yabai -m config left_padding 0
-yabai -m config right_padding 0
-yabai -m config window_gap 0
+# render all unfocused windows with 50% opacity
+yabai -m config window_opacity on
+yabai -m config active_window_opacity 1.0
+yabai -m config normal_window_opacity 0.5
+
+
+# # padding set to 10px
+# yabai -m config top_padding 10
+# yabai -m config bottom_padding 10
+# yabai -m config left_padding 10
+# yabai -m config right_padding 10
+# yabai -m config window_gap 10
+
 
 # -- mouse settings --
-
 # center mouse on window with focus
 yabai -m config mouse_follows_focus off
 
@@ -25,6 +31,7 @@ yabai -m config mouse_action2 resize
 
 # when window is dropped in center of another window, swap them (on edges it will split it)
 yabai -m mouse_drop_action swap
+# -- mouse settings --
 
 
 # disable specific apps
