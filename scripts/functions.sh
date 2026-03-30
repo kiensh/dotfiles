@@ -9,16 +9,21 @@ function time_shell() {
     for i in $(seq 1 10); do /usr/bin/time $shell -i -c exit; done
 }
 
-# yazi
-function yazi() {
+function _cursor_restore() { printf '\e[4 q'; } # change cursor style to underline steady
+
+[[ $(command -v yazi) ]] && function yazi() {
     /opt/homebrew/bin/yazi "$@"
-    printf "\033[4 q" # change cursor style to underline steady
+    _cursor_restore
 }
 
-# Typing Test toipe
-function toipe() {
+[[ $(command -v toipe) ]] && function toipe() {
     /opt/homebrew/bin/toipe "$@"
-    printf "\033[4 q" # change cursor style to underline steady
+    _cursor_restore
+}
+
+[[ $(command -v nvim) ]] && function nvim() {
+    /opt/homebrew/bin/nvim "$@"
+    _cursor_restore
 }
 
 # jumping to a directory
