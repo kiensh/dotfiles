@@ -27,4 +27,5 @@ fi
 [[ $(command -v webtorrent) ]] && alias tor=torrent torrent='webtorrent --not-on-top --mpv $(pbpaste)'
 [[ $(command -v yazi) ]] && alias y=yazi
 [[ $(command -v toipe) ]] && alias t='toipe --wordlist top2500'
-[[ $(command -v cursor) ]] && alias cur='cursor' ag=agent
+[[ $(command -v cursor) ]] && alias cur=cursor
+[[ $(command -v claude) ]] && alias cla=claude
