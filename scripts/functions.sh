@@ -55,15 +55,22 @@ function update_zsh_plugins() {
     done
 }
 
-# kill port
-function kill_port() {
+function port() {
     if [ -z "$1" ]; then
-        echo "Usage: kill_port <port_number>"
+        echo "Usage: port <port_number>"
         return 1
     fi
     # check if port is in use or not
     if ! lsof -i tcp:$1 >/dev/null; then
         echo "Port $1 is not in use."
+        return 0
+    fi
+    # print basic process info
+    echo ""
+    lsof -i tcp:$1 | awk 'NR==1 {print "\033[0;32m" $0 "\033[0m"} NR>1 {print}'
+    echo ""
+    read "answer?Do you want to kill the process using it? (y/[n]) "
+    if [[ "$answer" != "y" ]]; then
         return 0
     fi
     lsof -i tcp:$1 | awk 'NR>1 {print $2}' | xargs kill -9
