@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # cd backward shortcuts
 function ..() { cd ..; }
 function ...() { cd ../..; }

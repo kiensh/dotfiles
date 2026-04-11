@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 alias mpv-playlist="ls *.{mp4,mkv} | sort -V | mpv --playlist=-"
 alias v="vim"
 

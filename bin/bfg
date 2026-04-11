@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Ensure you have a clean working directory
 git filter-branch -f --env-filter \

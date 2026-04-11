@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 globalias() {
    # Get last word to the left of the cursor:
    # (z) splits into words using shell parsing

@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 
 # zsh-completions
 [ ! -d "$ZSH/zsh-completions" ] && git clone https://github.com/zsh-users/zsh-completions $ZSH/zsh-completions

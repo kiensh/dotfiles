@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 
 export HISTSIZE=10000000 SAVEHIST=10000000
 # brew

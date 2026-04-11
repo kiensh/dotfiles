@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 # Copy from oh-my-zsh
 
 if (( ${+terminfo[smkx]} )) && (( ${+terminfo[rmkx]} )); then

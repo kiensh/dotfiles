@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 dotfiles=$HOME/Workspaces/personal/dotfiles
 nvim=$HOME/.config/nvim

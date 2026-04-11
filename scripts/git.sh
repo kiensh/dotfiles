@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 alias g='git'
 alias gb='git branch'
 alias gc='git checkout'

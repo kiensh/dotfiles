@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 echo "Getting Size... '$(dirname $1)'"
 du -a --si . | sort -h | tail -n $(tput lines)
