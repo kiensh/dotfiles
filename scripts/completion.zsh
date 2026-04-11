@@ -1,9 +1,9 @@
 autoload -Uz compinit
 compinit -u
 
-# function _fzf() { source <(fzf --zsh); }
-# [[ $(command -v fzf) ]] && compdef _fzf fzf
-#
+# fzf zsh integration
+[[ $(command -v fzf) ]] && source <(fzf --zsh)
+
 # function _ng() { source <(ng completion script); }
 # [[ $(command -v ng) ]] && compdef _ng ng
 
