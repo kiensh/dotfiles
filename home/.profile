@@ -32,24 +32,17 @@ fi
 PATH+=":$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 
 # flutter
-if [ $(command -v flutter) ]; then
-    PATH+=":$HOME/.pub-cache/bin"
-fi
+[ -d "$HOME/.pub-cache" ] && PATH+=":$HOME/.pub-cache/bin"
 
 # jdk
 export JAVA_HOME="/Library/Java/JavaVirtualMachines/oracle-jdk-21.0.3"
 export CPPFLAGS="-I/Library/Java/JavaVirtualMachines/oracle-jdk-21.0.3/include"
 
 # kubectl
-if [ $(command -v kubectl) ]; then
-    export KUBECONFIG="$HOME/.kube/config.yml"
-fi
+[ -d "$HOME/.kube" ] && export KUBECONFIG="$HOME/.kube/config.yml"
 
 # golang
-if [ $(command -v go) ]; then
-    GOPATH="$(go env GOPATH)"
-    PATH+=":$GOPATH/bin"
-fi
+[ -d "$HOME/go" ] && PATH+=":$HOME/go/bin"
 
 # Environment
 [ -f "$HOME/.env" ] && source "$HOME/.env"
