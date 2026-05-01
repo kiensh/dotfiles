@@ -363,7 +363,7 @@ episodes_list() {
     fi
     [ $latest_sub -eq 0 ] && mode="dub"
     [ $latest_dub -eq 0 ] && mode="sub"
-    [ -z "$mode" ] && mode="$(printf "sub (%s episodes)\ndub (%s episodes)" "$latest_sub" "$latest_dub" | nth "Select mode: " | cut -d " " -f1)"
+    [ -z "$mode" ] && [ -t 0 ] && mode="$(printf "sub (%s episodes)\ndub (%s episodes)" "$latest_sub" "$latest_dub" | nth "Select mode: " | cut -d " " -f1)"
     if [ "$mode" == "dub" ]; then
         printf "%s" "$list_dub"
     else
