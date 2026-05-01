@@ -363,7 +363,10 @@ episodes_list() {
     fi
     [ $latest_sub -eq 0 ] && mode="dub"
     [ $latest_dub -eq 0 ] && mode="sub"
-    [ -z "$mode" ] && [ -t 0 ] && mode="$(printf "sub (%s episodes)\ndub (%s episodes)" "$latest_sub" "$latest_dub" | nth "Select mode: " | cut -d " " -f1)"
+    [ -z "$mode" ] && [ -t 0 ] && {
+        mode="$(printf "sub (%s episodes)\ndub (%s episodes)" "$latest_sub" "$latest_dub" | nth "Select mode: " | cut -d " " -f1)"
+        [ -z "$mode" ] && exit 1
+    }
     if [ "$mode" == "dub" ]; then
         printf "%s" "$list_dub"
     else
@@ -377,13 +380,14 @@ process_hist_entry() {
     ep_list=$(episodes_list "$id")
     latest_ep=$(printf "%s\n" "$ep_list" | tail -n1)
     title=$(printf "%s\n" "$title" | sed "s|[0-9]\+ episodes|${latest_ep} episodes|")
-    ep_no=$(printf "%s" "$ep_list" | sed -n "/^${ep_no}$/{n;p;}") 2>/dev/null
+    printf "%s" "$ep_list" | grep -q "^${ep_no}$" 2>/dev/null || ep_no=""
     [ -n "$ep_no" ] && printf "%s\t%s - episode %s\n" "$id" "$title" "$ep_no"
 }
 
 update_history() {
     if grep -q -- "$id" "$histfile"; then
-        sed -E "s|^[^	]+	${id}	[^	]+$|${ep_no}	${id}	${title}|" "$histfile" >"${histfile}.new"
+        grep -v -- "$id" "$histfile" >"${histfile}.new"
+        printf "%s\t%s\t%s\n" "$ep_no" "$id" "$title" >>"${histfile}.new"
     else
         cp "$histfile" "${histfile}.new"
         printf "%s\t%s\t%s\n" "$ep_no" "$id" "$title" >>"${histfile}.new"
@@ -615,14 +619,21 @@ esac
 # searching
 case "$search" in
     history)
-        anime_list=$(while read -r ep_no id title; do process_hist_entry & done <"$histfile")
+        tmpdir=$(mktemp -d)
+        i=1
+        while read -r ep_no id title; do
+            ( process_hist_entry > "$tmpdir/$i" ) &
+            i=$((i + 1))
+        done < <(tail -r "$histfile")
         wait
-        [ -z "$anime_list" ] && die "No unwatched series in history!"
+        anime_list=$(for f in $(seq 1 $((i - 1))); do cat "$tmpdir/$f" 2>/dev/null; done)
+        rm -rf "$tmpdir"
+        [ -z "$anime_list" ] && die "No series in history!"
         [ -z "${index##*[!0-9]*}" ] && id=$(printf "%s" "$anime_list" | nl -w 2 | sed 's/^[[:space:]]//' | nth "Select anime: " | cut -f1)
         [ -z "${index##*[!0-9]*}" ] || id=$(printf "%s" "$anime_list" | sed -n "${index}p" | cut -f1)
         [ -z "$id" ] && exit 1
         title=$(printf "%s" "$anime_list" | grep "$id" | cut -f2 | sed 's/ - episode.*//')
-        ep_list=$(episodes_list "$id")
+        ep_list=$(episodes_list "$id") || exit 1
         ep_no=$(printf "%s" "$anime_list" | grep "$id" | cut -f2 | sed -nE 's/.*- episode (.+)$/\1/p')
         allanime_title="$(printf "%s" "$title" | cut -d'(' -f1 | tr -d '[:punct:]')"
         ;;
