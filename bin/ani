@@ -10,10 +10,31 @@ external_menu() {
 }
 
 launcher() {
-    [ "$use_external_menu" = "0" ] && [ -z "$1" ] && set -- "+m" "$2"
-    [ "$use_external_menu" = "0" ] && fzf "$1" --reverse --cycle --prompt "$2"
-    [ "$use_external_menu" = "1" ] && external_menu "$1" "$2" "$external_menu_args"
-    [ "$use_external_menu" = "2" ] && external_menu "$1" "$2"
+    local fzf_args=("--reverse" "--cycle")
+    local prompt="" multi_flag="" preview_cmd="" preview_window="" delimiter="" with_nth="" nth_field=""
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --prompt=*) prompt="${1#--prompt=}" ;;
+            --preview=*) preview_cmd="${1#--preview=}" ;;
+            --preview-window=*) preview_window="${1#--preview-window=}" ;;
+            --delimiter=*) delimiter="${1#--delimiter=}" ;;
+            --with-nth=*) with_nth="${1#--with-nth=}" ;;
+            --nth=*) nth_field="${1#--nth=}" ;;
+            *) multi_flag="$1" ;;
+        esac
+        shift
+    done
+    [ -z "$multi_flag" ] && [ "$use_external_menu" = "0" ] && multi_flag="+m"
+    [ -n "$multi_flag" ] && fzf_args+=("$multi_flag")
+    [ -n "$prompt" ] && fzf_args+=("--prompt" "$prompt")
+    [ -n "$delimiter" ] && fzf_args+=("--delimiter" "$delimiter")
+    [ -n "$with_nth" ] && fzf_args+=("--with-nth" "$with_nth")
+    [ -n "$nth_field" ] && fzf_args+=("--nth" "$nth_field")
+    [ -n "$preview_cmd" ] && fzf_args+=("--preview=$preview_cmd")
+    [ -n "$preview_window" ] && fzf_args+=("--preview-window=$preview_window")
+    [ "$use_external_menu" = "0" ] && fzf "${fzf_args[@]}"
+    [ "$use_external_menu" = "1" ] && external_menu "$multi_flag" "$prompt" "$external_menu_args"
+    [ "$use_external_menu" = "2" ] && external_menu "$multi_flag" "$prompt"
 }
 
 nth() {
@@ -28,9 +49,9 @@ nth() {
     [ $# -gt 1 ] && shift && preview_cmd="$1"
     if [ -n "$preview_cmd" ]; then
         [ -z "$multi_flag" ] && multi_flag="+m"
-        line=$(printf "%s" "$stdin" | awk -F'\t' -v OFS='\t' '{$5=$1" "$3; print}' | fzf --delimiter="	" --with-nth=5 --nth=5 "$multi_flag" --reverse --cycle --prompt "$prompt" --preview="$preview_cmd" --preview-window="right:25%,border-vertical" | cut -f1)
+        line=$(printf "%s" "$stdin" | awk -F'\t' -v OFS='\t' '{$5=$1" "$3; print}' | launcher "$multi_flag" "--prompt=$prompt" "--delimiter=	" "--with-nth=5" "--nth=5" "--preview=$preview_cmd" "--preview-window=right:25%,border-vertical" | cut -f1)
     else
-        line=$(printf "%s" "$stdin" | cut -f1,3 | tr '\t' ' ' | launcher "$multi_flag" "$prompt" | cut -d " " -f 1)
+        line=$(printf "%s" "$stdin" | cut -f1,3 | tr '\t' ' ' | launcher "$multi_flag" "--prompt=$prompt" | cut -d " " -f 1)
     fi
     line_start=$(printf "%s" "$line" | head -n1)
     line_end=$(printf "%s" "$line" | tail -n1)
@@ -57,6 +78,8 @@ help_info() {
     Options:
       -c, --continue
         Continue watching from history
+      -u, --unwatched
+        Continue watching from history (only show anime with new episodes)
       -d, --download
         Download the video instead of playing it
       -D, --delete
@@ -414,7 +437,7 @@ process_hist_entry() {
     latest_ep=$(printf "%s\n" "$ep_list" | tail -n1)
     title=$(printf "%s\n" "$title" | sed "s|[0-9]\+ episodes|${latest_ep} episodes|")
     printf "%s" "$ep_list" | grep -q "^${ep_no}$" 2>/dev/null || ep_no=""
-    [ -n "$ep_no" ] && printf "%s\t%s - episode %s\t%s\n" "$id" "$title" "$ep_no" "$thumbnail"
+    [ -n "$ep_no" ] && printf "%s\t%s - episode %s\t%s\t%s\n" "$id" "$title" "$ep_no" "$thumbnail" "$latest_ep"
 }
 
 update_history() {
@@ -550,6 +573,7 @@ use_external_menu="${ANI_CLI_EXTERNAL_MENU:-0}"
 external_menu_normal_window="${ANI_CLI_EXTERNAL_MENU_NORMAL_WINDOW:-0}"
 skip_intro="${ANI_CLI_SKIP_INTRO:-0}"
 skip_title="${ANI_CLI_SKIP_TITLE:-}"
+unwatched_only=0
 [ -t 0 ] || (command -v dmenu && use_external_menu=2)
 [ -t 0 ] || (command -v rofi && use_external_menu=1)
 hist_dir="${ANI_CLI_HIST_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/ani-cli}"
@@ -591,6 +615,7 @@ while [ $# -gt 0 ]; do
             shift
             ;;
         -c | --continue) search=history ;;
+        -u | --unwatched) search=history && unwatched_only=1 ;;
         -d | --download)
             [ "$player_function" = "iSH" ] && iSH_DownFix="--async-dns=false"
             player_function=download
@@ -669,6 +694,7 @@ case "$search" in
         wait
         anime_list=$(for f in $(seq 1 $((i - 1))); do cat "$tmpdir/$f" 2>/dev/null; done)
         rm -rf "$tmpdir"
+        [ "$unwatched_only" = "1" ] && anime_list=$(printf "%s" "$anime_list" | awk -F'\t' '{ n=split($2,a,"- episode "); if (n==2 && a[2]+0 < $4+0) print }')
         [ -z "$anime_list" ] && die "No series in history!"
         [ -z "${index##*[!0-9]*}" ] && id=$(printf "%s" "$anime_list" | nl -w 2 | sed 's/^[[:space:]]//' | nth "Select anime: " "" "$preview_cmd" | cut -f1)
         [ -z "${index##*[!0-9]*}" ] || id=$(printf "%s" "$anime_list" | sed -n "${index}p" | cut -f1)
