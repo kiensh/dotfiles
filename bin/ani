@@ -371,17 +371,18 @@ get_episode_url() {
 # search the query and give results
 search_anime() {
     #shellcheck disable=SC2016
-    search_gql='query( $search: SearchInput $limit: Int $page: Int $translationType: VaildTranslationTypeEnumType $countryOrigin: VaildCountryOriginEnumType ) { shows( search: $search limit: $limit page: $page translationType: $translationType countryOrigin: $countryOrigin ) { edges { _id name thumbnail availableEpisodes __typename } }}'
+    search_gql='query( $search: SearchInput $limit: Int $page: Int $translationType: VaildTranslationTypeEnumType $countryOrigin: VaildCountryOriginEnumType ) { shows( search: $search limit: $limit page: $page translationType: $translationType countryOrigin: $countryOrigin ) { edges { _id name thumbnail availableEpisodes status __typename } }}'
 
     s_id='_id\":\"([^\"]*)\"'
     s_name='name\":\"(.+)\",'
     s_sub='sub\":([0-9][^,]*)'
     s_dub='dub\":([0-9][^,]*)'
     s_thumb='thumbnail\":\"([^\"]*)\"'
+    s_status='status\":\"([^\"]*)\"'
     curl -e "$allanime_refr" -s -H "Content-Type: application/json" -X POST "${allanime_api}/api" --data "{\"variables\":{\"search\":{\"allowAdult\":true,\"allowUnknown\":false,\"query\":\"$1\"},\"limit\":40,\"page\":1,\"translationType\":\"$mode\",\"countryOrigin\":\"ALL\"},\"query\":\"$search_gql\"}" -A "$agent" \
     | sed 's|Show|\
 |g' \
-    | sed -nE "s|.*$s_id.*$s_name.*$s_thumb.*$s_sub.*$s_dub.*|\1	\2 (\4 sub \5 dub)	\3|p" \
+    | sed -nE "s|.*$s_id.*$s_name.*$s_thumb.*$s_sub.*$s_dub.*$s_status.*|\1	\2 (\4 sub \5 dub)	\3	\6|p" \
     | sed 's/\\"//g' \
     | awk -F'\t' -v OFS='\t' '{if($3 !~ /^http/ && $3 != "") $3="https://aln.youtube-anime.com/"$3; print}'
 }
@@ -404,7 +405,7 @@ time_until_next_ep() {
 episodes_list() {
     mode=""
     #shellcheck disable=SC2016
-    episodes_list_gql='query ($showId: String!) { show( _id: $showId ) { _id availableEpisodesDetail }}'
+    episodes_list_gql='query ($showId: String!) { show( _id: $showId ) { _id availableEpisodesDetail status }}'
 
     data=$(curl -e "$allanime_refr" -s -H "Content-Type: application/json" -X POST "${allanime_api}/api" --data "{\"variables\":{\"showId\":\"$*\"},\"query\":\"$episodes_list_gql\"}" -A "$agent")
     list_sub=$(printf "%s" "$data" \
@@ -417,6 +418,7 @@ episodes_list() {
                 | sort -n -k 1)
     latest_sub=$([ -z "$list_sub" ] && echo 0 || printf "%s" "$list_sub" | tail -n1)
     latest_dub=$([ -z "$list_dub" ] && echo 0 || printf "%s" "$list_dub" | tail -n1)
+    show_status=$(printf "%s" "$data" | sed -nE 's|.*status":"([^"]*)".*|\1|p')
     if [ $latest_sub -eq 0 ] && [ $latest_dub -eq 0 ]; then
         echo "No episodes found for this anime."
         exit 1
@@ -444,13 +446,13 @@ migrate_thumbnails() {
     local mig_tmpdir mig_i
     mig_tmpdir=$(mktemp -d)
     mig_i=1
-    while IFS=$'\t' read -r ep_no id title thumbnail; do
+    while IFS=$'\t' read -r ep_no id title thumbnail status; do
         (
             if [ -n "$thumbnail" ] && curl -sI --max-time 2 -o /dev/null "$thumbnail" 2>/dev/null; then
-                printf "%s\t%s\t%s\t%s\n" "$ep_no" "$id" "$title" "$thumbnail"
+                printf "%s\t%s\t%s\t%s\t%s\n" "$ep_no" "$id" "$title" "$thumbnail" "${status:-}"
             else
                 thumbnail=$(fetch_thumbnail "$id")
-                printf "%s\t%s\t%s\t%s\n" "$ep_no" "$id" "$title" "$thumbnail"
+                printf "%s\t%s\t%s\t%s\t%s\n" "$ep_no" "$id" "$title" "$thumbnail" "${status:-}"
             fi
         ) > "$mig_tmpdir/$mig_i" &
         mig_i=$((mig_i + 1))
@@ -460,12 +462,55 @@ migrate_thumbnails() {
     rm -rf "$mig_tmpdir"
 }
 
+migrate_status() {
+    awk -F'\t' 'NF < 5 || $5 == ""' "$histfile" | head -1 | grep -q . || return 0
+    local mig_tmpdir mig_i
+    mig_tmpdir=$(mktemp -d)
+    mig_i=1
+    while IFS=$'\t' read -r ep_no id title thumbnail status; do
+        if [ -n "$status" ]; then
+            printf "%s\t%s\t%s\t%s\t%s\n" "$ep_no" "$id" "$title" "$thumbnail" "$status" > "$mig_tmpdir/$mig_i"
+        else
+            (
+                data=$(curl -e "$allanime_refr" -s -H "Content-Type: application/json" -X POST "${allanime_api}/api" \
+                    --data '{"variables":{"showId":"'"$id"'"},"query":"query ($showId: String!) { show( _id: $showId ) { availableEpisodesDetail status }}"}' -A "$agent")
+                new_status=$(printf "%s" "$data" | sed -nE 's|.*status":"([^"]*)".*|\1|p')
+                sub_count=$(printf "%s" "$data" | sed -nE 's|.*sub":\[([0-9.",]*)\].*|\1|p' | tr ',' '\n' | grep -c '[0-9]')
+                dub_count=$(printf "%s" "$data" | sed -nE 's|.*dub":\[([0-9.",]*)\].*|\1|p' | tr ',' '\n' | grep -c '[0-9]')
+                if [ -n "$new_status" ]; then
+                    title=$(printf "%s" "$title" | sed -E 's| *\([0-9]+ sub [0-9]+ dub\)$||')
+                    title="${title} (${sub_count} sub ${dub_count} dub)"
+                    printf "%s\t%s\t%s\t%s\t%s\n" "$ep_no" "$id" "$title" "$thumbnail" "$new_status"
+                else
+                    printf "%s\t%s\t%s\t%s\n" "$ep_no" "$id" "$title" "$thumbnail"
+                fi
+            ) > "$mig_tmpdir/$mig_i" &
+        fi
+        mig_i=$((mig_i + 1))
+    done < "$histfile"
+    wait
+    for f in $(seq 1 $((mig_i - 1))); do cat "$mig_tmpdir/$f" 2>/dev/null; done > "$histfile"
+    rm -rf "$mig_tmpdir"
+}
+
 process_hist_entry() {
-    ep_list=$(episodes_list "$id" | sed '$d')
-    latest_ep=$(printf "%s\n" "$ep_list" | tail -n1)
-    title=$(printf "%s\n" "$title" | sed "s|[0-9]\+ episodes|${latest_ep} episodes|")
+    sub_count=$(printf "%s" "$title" | sed -nE 's/.*\(([0-9]+) sub [0-9]+ dub\).*/\1/p')
+    dub_count=$(printf "%s" "$title" | sed -nE 's/.*\([0-9]+ sub ([0-9]+) dub\).*/\1/p')
+
+    if [ "$status" = "Finished" ] && [ -n "$sub_count" ] && [ "$sub_count" = "$dub_count" ]; then
+        ep_list=$(seq 1 "$sub_count")
+        latest_ep="$sub_count"
+    else
+        episodes_list "$id" > "${tmpdir}/eplist_${id}"
+        ep_list=$(sed '$d' "${tmpdir}/eplist_${id}")
+        latest_ep=$(printf "%s\n" "$ep_list" | tail -n1)
+        title=$(printf "%s\n" "$title" | sed -E 's| *\([0-9]+ sub [0-9]+ dub\)$||')
+        title="${title} (${latest_sub} sub ${latest_dub} dub)"
+        status="$show_status"
+    fi
+
     printf "%s" "$ep_list" | grep -q "^${ep_no}$" 2>/dev/null || ep_no=""
-    [ -n "$ep_no" ] && printf "%s\t%s - episode %s\t%s\t%s\n" "$id" "$title" "$ep_no" "$thumbnail" "$latest_ep"
+    [ -n "$ep_no" ] && printf "%s\t%s - episode %s\t%s\t%s\t%s\n" "$id" "$title" "$ep_no" "$thumbnail" "$latest_ep" "$status"
 }
 
 format_titles() {
@@ -494,10 +539,10 @@ format_titles() {
 update_history() {
     if grep -q -- "$id" "$histfile"; then
         grep -v -- "$id" "$histfile" >"${histfile}.new"
-        printf "%s\t%s\t%s\t%s\n" "$ep_no" "$id" "$title" "$thumbnail" >>"${histfile}.new"
+        printf "%s\t%s\t%s\t%s\t%s\n" "$ep_no" "$id" "$title" "$thumbnail" "$status" >>"${histfile}.new"
     else
         cp "$histfile" "${histfile}.new"
-        printf "%s\t%s\t%s\t%s\n" "$ep_no" "$id" "$title" "$thumbnail" >>"${histfile}.new"
+        printf "%s\t%s\t%s\t%s\t%s\n" "$ep_no" "$id" "$title" "$thumbnail" "$status" >>"${histfile}.new"
     fi
     mv "${histfile}.new" "$histfile"
 }
@@ -735,10 +780,11 @@ else
 fi
 case "$search" in
     history)
+        migrate_status
         migrate_thumbnails
         tmpdir=$(mktemp -d)
         i=1
-        while IFS=$'\t' read -r ep_no id title thumbnail; do
+        while IFS=$'\t' read -r ep_no id title thumbnail status; do
             ( process_hist_entry > "$tmpdir/$i" ) &
             i=$((i + 1))
         done < <(tail -r "$histfile")
@@ -752,6 +798,7 @@ case "$search" in
         [ -z "$id" ] && exit 1
         title=$(printf "%s" "$anime_list" | grep "$id" | cut -f2 | sed 's/ - episode.*//')
         thumbnail=$(printf "%s" "$anime_list" | awk -F'\t' -v id="$id" '$1 == id {print $3; exit}')
+        status=$(printf "%s" "$anime_list" | awk -F'\t' -v id="$id" '$1 == id {print $5; exit}')
         ep_list_full=$(episodes_list "$id") || exit 1
         mode=$(printf "%s" "$ep_list_full" | tail -1)
         ep_list=$(printf "%s" "$ep_list_full" | sed '$d')
@@ -781,6 +828,7 @@ case "$search" in
         title=$(printf "%s" "$anime_list" | awk -F'\t' -v id="$id" '$1 == id {print $2; exit}')
         allanime_title="$(printf "%s" "$title" | cut -d'(' -f1 | tr -d '[:punct:]')"
         thumbnail=$(printf "%s" "$anime_list" | awk -F'\t' -v id="$id" '$1 == id {print $3; exit}')
+        status=$(printf "%s" "$anime_list" | awk -F'\t' -v id="$id" '$1 == id {print $4; exit}')
         ep_list_full=$(episodes_list "$id")
         mode=$(printf "%s" "$ep_list_full" | tail -1)
         ep_list=$(printf "%s" "$ep_list_full" | sed '$d')
