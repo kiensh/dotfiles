@@ -504,8 +504,10 @@ process_hist_entry() {
         episodes_list "$id" > "${tmpdir}/eplist_${id}"
         ep_list=$(sed '$d' "${tmpdir}/eplist_${id}")
         latest_ep=$(printf "%s\n" "$ep_list" | tail -n1)
+        sub_count=$(printf "%s" "$list_sub" | grep -c '[0-9]')
+        dub_count=$(printf "%s" "$list_dub" | grep -c '[0-9]')
         title=$(printf "%s\n" "$title" | sed -E 's| *\([0-9]+ sub [0-9]+ dub\)$||')
-        title="${title} (${latest_sub} sub ${latest_dub} dub)"
+        title="${title} (${sub_count} sub ${dub_count} dub)"
         status="$show_status"
     fi
 
