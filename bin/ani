@@ -11,7 +11,7 @@ external_menu() {
 
 launcher() {
     local fzf_args=("--reverse" "--cycle")
-    local prompt="" multi_flag="" preview_cmd="" preview_window="" delimiter="" with_nth="" nth_field=""
+    local prompt="" multi_flag="" preview_cmd="" preview_window="" delimiter="" with_nth="" nth_field="" expect_key=""
     while [ $# -gt 0 ]; do
         case "$1" in
             --prompt=*) prompt="${1#--prompt=}" ;;
@@ -20,6 +20,7 @@ launcher() {
             --delimiter=*) delimiter="${1#--delimiter=}" ;;
             --with-nth=*) with_nth="${1#--with-nth=}" ;;
             --nth=*) nth_field="${1#--nth=}" ;;
+            --expect=*) expect_key="${1#--expect=}" ;;
             *) multi_flag="$1" ;;
         esac
         shift
@@ -30,6 +31,7 @@ launcher() {
     [ -n "$delimiter" ] && fzf_args+=("--delimiter" "$delimiter")
     [ -n "$with_nth" ] && fzf_args+=("--with-nth" "$with_nth")
     [ -n "$nth_field" ] && fzf_args+=("--nth" "$nth_field")
+    [ -n "$expect_key" ] && fzf_args+=("--expect=$expect_key")
     [ -n "$preview_cmd" ] && fzf_args+=("--preview=$preview_cmd")
     [ -n "$preview_window" ] && fzf_args+=("--preview-window=$preview_window")
     [ "$use_external_menu" = "0" ] && fzf "${fzf_args[@]}"
@@ -45,21 +47,40 @@ nth() {
     prompt="$1"
     multi_flag=""
     preview_cmd=""
+    expect_key=""
     [ $# -gt 1 ] && shift && multi_flag="$1"
     [ $# -gt 1 ] && shift && preview_cmd="$1"
+    [ $# -gt 1 ] && shift && expect_key="$1"
     if [ -n "$preview_cmd" ]; then
         [ -z "$multi_flag" ] && multi_flag="+m"
-        line=$(printf "%s" "$stdin" | awk -F'\t' -v OFS='\t' '{$5=$1" "$3; print}' | launcher "$multi_flag" "--prompt=$prompt" "--delimiter=	" "--with-nth=5" "--nth=5" "--preview=$preview_cmd" "--preview-window=right:25%,border-vertical" | cut -f1)
+        if [ -n "$expect_key" ]; then
+            fzf_raw=$(printf "%s" "$stdin" | awk -F'\t' -v OFS='\t' '{$5=$1" "$3; print}' | launcher "$multi_flag" "--prompt=$prompt" "--delimiter=	" "--with-nth=5" "--nth=5" "--preview=$preview_cmd" "--preview-window=right:25%,border-vertical" "--expect=$expect_key")
+            nth_key=$(printf "%s" "$fzf_raw" | head -1)
+            line=$(printf "%s" "$fzf_raw" | sed -n '2p' | cut -f1)
+        else
+            line=$(printf "%s" "$stdin" | awk -F'\t' -v OFS='\t' '{$5=$1" "$3; print}' | launcher "$multi_flag" "--prompt=$prompt" "--delimiter=	" "--with-nth=5" "--nth=5" "--preview=$preview_cmd" "--preview-window=right:25%,border-vertical" | cut -f1)
+        fi
     else
-        line=$(printf "%s" "$stdin" | cut -f1,3 | tr '\t' ' ' | launcher "$multi_flag" "--prompt=$prompt" | cut -d " " -f 1)
+        if [ -n "$expect_key" ]; then
+            fzf_raw=$(printf "%s" "$stdin" | cut -f1,3 | tr '\t' ' ' | launcher "$multi_flag" "--prompt=$prompt" "--expect=$expect_key")
+            nth_key=$(printf "%s" "$fzf_raw" | head -1)
+            line=$(printf "%s" "$fzf_raw" | sed -n '2p' | cut -d " " -f 1)
+        else
+            line=$(printf "%s" "$stdin" | cut -f1,3 | tr '\t' ' ' | launcher "$multi_flag" "--prompt=$prompt" | cut -d " " -f 1)
+        fi
     fi
     line_start=$(printf "%s" "$line" | head -n1)
     line_end=$(printf "%s" "$line" | tail -n1)
     [ -n "$line" ] || exit 1
     if [ "$line_start" = "$line_end" ]; then
-        printf "%s" "$stdin" | grep -E '^'"${line}"'($|[[:space:]])' | cut -f2,3 || exit 1
+        result=$(printf "%s" "$stdin" | grep -E '^'"${line}"'($|[[:space:]])' | cut -f2,3 || exit 1)
     else
-        printf "%s" "$stdin" | sed -n '/^'"${line_start}"'$/,/^'"${line_end}$"'/p' || exit 1
+        result=$(printf "%s" "$stdin" | sed -n '/^'"${line_start}"'$/,/^'"${line_end}$"'/p' || exit 1)
+    fi
+    if [ -n "$expect_key" ]; then
+        printf "%s\n__nth_key__:%s" "$result" "$nth_key"
+    else
+        printf "%s" "$result"
     fi
 }
 
@@ -795,7 +816,32 @@ case "$search" in
         rm -rf "$tmpdir"
         [ "$unwatched_only" = "1" ] && anime_list=$(printf "%s" "$anime_list" | awk -F'\t' '{ n=split($2,a,"- episode "); if (n==2 && a[2]+0 < $4+0) print }')
         [ -z "$anime_list" ] && die "No series in history!"
-        [ -z "${index##*[!0-9]*}" ] && id=$(printf "%s" "$anime_list" | nl -w 2 | sed 's/^[[:space:]]//' | format_titles | nth "Select anime: " "" "$preview_cmd" | cut -f1)
+        if [ -z "${index##*[!0-9]*}" ]; then
+            while true; do
+                output=$(printf "%s" "$anime_list" | nl -w 2 | sed 's/^[[:space:]]//' | format_titles | nth "Select anime (ctrl-r: remove): " "" "$preview_cmd" "ctrl-r")
+                [ -z "$output" ] && exit 1
+                nth_expect_key=$(printf "%s" "$output" | sed -n 's/^__nth_key__://p')
+                selected=$(printf "%s" "$output" | sed '/^__nth_key__:/d')
+                if [ "$nth_expect_key" = "ctrl-r" ]; then
+                    title=$(printf "%s" "$selected" | cut -f2 | sed 's/ - episode.*//')
+                    printf "Remove \"%s\" from history? [y/N] " "$title" >&2
+                    read -r confirm
+                    case "$confirm" in
+                        [yY]|[yY][eE][sS])
+                            id=$(printf "%s" "$selected" | cut -f1)
+                            grep -v -- "$id" "$histfile" > "${histfile}.tmp"
+                            mv "${histfile}.tmp" "$histfile"
+                            anime_list=$(printf "%s" "$anime_list" | awk -F'\t' -v id="$id" '$1 != id')
+                            printf "\33[2K\r\033[1;32mRemoved from history\033[0m\n"
+                            [ -z "$anime_list" ] && die "No series in history!"
+                            ;;
+                    esac
+                else
+                    id=$(printf "%s" "$selected" | cut -f1)
+                    break
+                fi
+            done
+        fi
         [ -z "${index##*[!0-9]*}" ] || id=$(printf "%s" "$anime_list" | sed -n "${index}p" | cut -f1)
         [ -z "$id" ] && exit 1
         title=$(printf "%s" "$anime_list" | grep "$id" | cut -f2 | sed 's/ - episode.*//')
