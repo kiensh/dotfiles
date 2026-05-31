@@ -982,7 +982,7 @@ while
             --header "$_status" \
             --prompt "Playing episode $ep_no of $title... ")
 
-    kill "$_poller_pid" 2>/dev/null
+    kill "$_poller_pid" 2>/dev/null || true
 do
     case "$cmd" in
         next) ep_no=$(printf "%s" "$ep_list" | sed -n "/^${ep_no}$/{n;p;}") 2>/dev/null
