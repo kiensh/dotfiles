@@ -974,6 +974,7 @@ while
         ) >/dev/null 2>&1 &
         _poller_pid=$!
     fi
+    debug_log "while-cond: next_ep=${next_ep:-<empty>} _pf_file_exists=$([ -f "$_pf_file" ] && echo yes || echo no) _poller_pid=${_poller_pid:-<empty>}"
 
     # fzf in foreground with --listen — stdout captured by $(), display on /dev/tty
     cmd=$(printf "next\nreplay\nprevious\nselect\nchange_quality\nquit" | \
@@ -981,8 +982,10 @@ while
             --listen=127.0.0.1:$_port \
             --header "$_status" \
             --prompt "Playing episode $ep_no of $title... ")
+    debug_log "while-cond: fzf returned cmd=$cmd"
 
     kill "$_poller_pid" 2>/dev/null || true
+    debug_log "while-cond: kill done"
 do
     case "$cmd" in
         next) ep_no=$(printf "%s" "$ep_list" | sed -n "/^${ep_no}$/{n;p;}") 2>/dev/null
