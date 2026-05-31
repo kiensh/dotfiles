@@ -397,9 +397,9 @@ get_episode_url() {
 }
 
 cache_episode() {
-    _ce_dir="$prefetch_dir/$id"
+    _ce_dir="$prefetch_dir/$id/$mode"
     _ce_file="$_ce_dir/$ep_no.mp4"
-    if [ -f "$_ce_file" ]; then
+    if [ -f "$_ce_file" ] && [ -f "$_ce_file.done" ]; then
         debug_log "cache hit: $_ce_file"
         printf "\33[2K\r\033[34mUsing cached episode %s\033[0m\n" "$ep_no"
         episode="$_ce_file"
@@ -423,9 +423,9 @@ cache_episode() {
 prefetch_episode() {
     (
         ep_no=$1
-        _pf_dir="$prefetch_dir/$id"
+        _pf_dir="$prefetch_dir/$id/$mode"
         _pf_file="$_pf_dir/$ep_no.mp4"
-        [ -f "$_pf_file" ] && debug_log "prefetch ep $ep_no: already exists" && exit 0
+        [ -f "$_pf_file" ] && [ -f "$_pf_file.done" ] && debug_log "prefetch ep $ep_no: already exists" && exit 0
         debug_log "prefetch ep $ep_no: resolving URL"
         unset episode subs_flag refr_flag subtitle links
         get_episode_url 2>/dev/null
@@ -435,6 +435,7 @@ prefetch_episode() {
         [ -n "$refr_flag" ] && _refr="-referer ${refr_flag#--referrer=}"
         debug_log "prefetch ep $ep_no: ffmpeg -i $episode -> $_pf_file"
         ffmpeg -loglevel error $_refr -i "$episode" -c copy -movflags +faststart -y "$_pf_file" 2>&1
+        touch "$_pf_file.done"
         debug_log "prefetch ep $ep_no: done (exit=$?)"
     ) &
     prefetch_pid=$!
@@ -953,18 +954,18 @@ play
 
 while
     next_ep=$(printf "%s" "$ep_list" | sed -n "/^${ep_no}$/{n;p;}")
-    _pf_file="$prefetch_dir/$id/$next_ep.mp4"
+    _pf_file="$prefetch_dir/$id/$mode/$next_ep.mp4"
     _port=$((40000 + ($$ % 10000)))
     _status=""
-    [ -n "$next_ep" ] && [ -f "$_pf_file" ] && _status="Next ep $next_ep: cached"
-    [ -n "$next_ep" ] && [ ! -f "$_pf_file" ] && _status="Next ep $next_ep: downloading..."
+    [ -n "$next_ep" ] && [ -f "${_pf_file}.done" ] && _status="Next ep $next_ep: cached"
+    [ -n "$next_ep" ] && [ ! -f "${_pf_file}.done" ] && _status="Next ep $next_ep: downloading..."
 
     # Background poller: updates header when download completes
-    if [ -n "$next_ep" ] && [ ! -f "$_pf_file" ]; then
+    if [ -n "$next_ep" ] && [ ! -f "${_pf_file}.done" ]; then
         (
             while ! curl -s -o /dev/null "http://127.0.0.1:$_port" 2>/dev/null; do sleep 0.2; done
             while curl -s -o /dev/null "http://127.0.0.1:$_port" 2>/dev/null; do
-                if [ -f "$_pf_file" ]; then
+                if [ -f "${_pf_file}.done" ]; then
                     curl -s -X POST "http://127.0.0.1:$_port" \
                         -d "change-header(Next ep $next_ep: cached)" >/dev/null 2>&1
                     break
@@ -991,8 +992,8 @@ do
         next) ep_no=$(printf "%s" "$ep_list" | sed -n "/^${ep_no}$/{n;p;}") 2>/dev/null
               kill "$prefetch_pid" 2>/dev/null
               ;;
-        replay) episode="$prefetch_dir/$id/$ep_no.mp4"
-                [ -f "$episode" ] || episode="$replay"
+        replay) episode="$prefetch_dir/$id/$mode/$ep_no.mp4"
+                [ -f "$episode" ] && [ -f "${episode}.done" ] || episode="$replay"
                 ;;
         previous) ep_no=$(printf "%s" "$ep_list" | sed -n "/^${ep_no}$/{g;1!p;};h") 2>/dev/null ;;
         select) ep_no=$(printf "%s" "$ep_list" | nth "Select episode: " "$multi_selection_flag") ;;
