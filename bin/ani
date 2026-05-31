@@ -10,7 +10,7 @@ external_menu() {
 }
 
 launcher() {
-    local fzf_args=("--reverse" "--cycle")
+    local fzf_args=("--reverse" "--cycle" "--height=50%" "--border")
     local prompt="" multi_flag="" preview_cmd="" preview_window="" delimiter="" with_nth="" nth_field="" expect_key=""
     while [ $# -gt 0 ]; do
         case "$1" in
@@ -87,6 +87,13 @@ nth() {
 die() {
     printf "\33[2K\r\033[1;31m%s\033[0m\n" "$*" >&2
     exit 1
+}
+
+debug_log() {
+    [ "$debug" = 1 ] || return 0
+    _msg="$(date '+%H:%M:%S') $*"
+    printf "\33[2K\r\033[36m[debug] %s\033[0m\n" "$_msg"
+    echo "$_msg" >> "${TMPDIR:-/tmp}/ani-debug.log"
 }
 
 help_info() {
@@ -389,6 +396,50 @@ get_episode_url() {
     fi
 }
 
+cache_episode() {
+    _ce_dir="$prefetch_dir/$id"
+    _ce_file="$_ce_dir/$ep_no.mp4"
+    if [ -f "$_ce_file" ]; then
+        debug_log "cache hit: $_ce_file"
+        printf "\33[2K\r\033[34mUsing cached episode %s\033[0m\n" "$ep_no"
+        episode="$_ce_file"
+        unset subs_flag refr_flag
+        return 0
+    fi
+    debug_log "cache miss for ep $ep_no, resolving URL"
+    [ -z "$episode" ] && get_episode_url
+    [ -z "$episode" ] && return 1
+    mkdir -p "$_ce_dir"
+    _refr=""
+    [ -n "$refr_flag" ] && _refr="-referer ${refr_flag#--referrer=}"
+    debug_log "downloading ep $ep_no: ffmpeg -i $episode -> $_ce_file"
+    printf "\33[2K\r\033[34mDownloading episode %s...\033[0m\n" "$ep_no"
+    ffmpeg -loglevel error -stats $_refr -i "$episode" -c copy -movflags +faststart -y "$_ce_file" 2>&1
+    debug_log "download complete: $_ce_file"
+    episode="$_ce_file"
+    unset subs_flag refr_flag
+}
+
+prefetch_episode() {
+    (
+        ep_no=$1
+        _pf_dir="$prefetch_dir/$id"
+        _pf_file="$_pf_dir/$ep_no.mp4"
+        [ -f "$_pf_file" ] && debug_log "prefetch ep $ep_no: already exists" && exit 0
+        debug_log "prefetch ep $ep_no: resolving URL"
+        unset episode subs_flag refr_flag subtitle links
+        get_episode_url 2>/dev/null
+        [ -z "$episode" ] && debug_log "prefetch ep $ep_no: no URL resolved" && exit 1
+        mkdir -p "$_pf_dir"
+        _refr=""
+        [ -n "$refr_flag" ] && _refr="-referer ${refr_flag#--referrer=}"
+        debug_log "prefetch ep $ep_no: ffmpeg -i $episode -> $_pf_file"
+        ffmpeg -loglevel error $_refr -i "$episode" -c copy -movflags +faststart -y "$_pf_file" 2>&1
+        debug_log "prefetch ep $ep_no: done (exit=$?)"
+    ) &
+    prefetch_pid=$!
+}
+
 # search the query and give results
 search_anime() {
     #shellcheck disable=SC2016
@@ -593,7 +644,7 @@ download() {
 play_episode() {
     [ "$log_episode" = 1 ] && [ "$player_function" != "debug" ] && [ "$player_function" != "download" ] && command -v logger >/dev/null && logger -t ani-cli "${allanime_title}${ep_no}"
     [ "$skip_intro" = 1 ] && skip_flag="$(ani-skip -q "$mal_id" -e "$ep_no")"
-    [ -z "$episode" ] && get_episode_url
+    [ -z "$episode" ] && cache_episode
     # shellcheck disable=SC2086
     case "$player_function" in
         debug)
@@ -602,8 +653,6 @@ play_episode() {
             ;;
         mpv*)
             if [ "$no_detach" = 0 ]; then
-                tput clear
-                printf "\33[2K\r\033[1;31mWatching episode %s...\033[0m\n" "$ep_no"
                 nohup $player_function $skip_flag --force-media-title="${allanime_title}Episode ${ep_no}" "$episode" $subs_flag $refr_flag >/dev/null 2>&1 &
             else
                 $player_function $skip_flag $subs_flag $refr_flag --force-media-title="${allanime_title}Episode ${ep_no}" "$episode"
@@ -636,6 +685,8 @@ play_episode() {
     esac
     replay="$episode"
     unset episode
+    next_ep=$(printf "%s" "$ep_list" | sed -n "/^${ep_no}$/{n;p;}")
+    [ -n "$next_ep" ] && prefetch_episode "$next_ep"
     update_history
     [ "$use_external_menu" = "1" ] && wait
     [ "$use_external_menu" = "2" ] && wait
@@ -693,6 +744,7 @@ external_menu_normal_window="${ANI_CLI_EXTERNAL_MENU_NORMAL_WINDOW:-0}"
 skip_intro="${ANI_CLI_SKIP_INTRO:-0}"
 skip_title="${ANI_CLI_SKIP_TITLE:-}"
 unwatched_only=0
+debug="${ANI_CLI_DEBUG:-0}"
 [ -t 0 ] || (command -v dmenu && use_external_menu=2)
 [ -t 0 ] || (command -v rofi && use_external_menu=1)
 hist_dir="${ANI_CLI_HIST_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/ani-cli}"
@@ -702,6 +754,8 @@ histfile="$hist_dir/ani-hsts"
 has_image_preview=0
 [ -n "$KITTY_WINDOW_ID" ] && command -v kitty >/dev/null && has_image_preview=1
 search="${ANI_CLI_DEFAULT_SOURCE:-scrape}"
+prefetch_dir="${TMPDIR:-/tmp}/ani-prefetch"
+prefetch_pid=""
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -769,6 +823,7 @@ while [ $# -gt 0 ]; do
             skip_title="$2"
             shift
             ;;
+        --debug) debug=1 ;;
         -N | --nextep-countdown) search=nextep ;;
         -U | --update) update_script ;;
         *) query="$(printf "%s" "$query $1" | sed "s|^ ||;s| |+|g")" ;;
@@ -891,14 +946,51 @@ tput cuu1 && tput el
 # stores the position of cursor
 tput sc
 
+
 # playback & loop
 play
 [ "$player_function" = "download" ] || [ "$player_function" = "debug" ] && exit 0
 
-while cmd=$(printf "next\nreplay\nprevious\nselect\nchange_quality\nquit" | nth "Playing episode $ep_no of $title... "); do
+while
+    next_ep=$(printf "%s" "$ep_list" | sed -n "/^${ep_no}$/{n;p;}")
+    _pf_file="$prefetch_dir/$id/$next_ep.mp4"
+    _port=$((40000 + ($$ % 10000)))
+    _status=""
+    [ -n "$next_ep" ] && [ -f "$_pf_file" ] && _status="Next ep $next_ep: cached"
+    [ -n "$next_ep" ] && [ ! -f "$_pf_file" ] && _status="Next ep $next_ep: downloading..."
+
+    # Background poller: updates header when download completes
+    if [ -n "$next_ep" ] && [ ! -f "$_pf_file" ]; then
+        (
+            while ! curl -s -o /dev/null "http://127.0.0.1:$_port" 2>/dev/null; do sleep 0.2; done
+            while curl -s -o /dev/null "http://127.0.0.1:$_port" 2>/dev/null; do
+                if [ -f "$_pf_file" ]; then
+                    curl -s -X POST "http://127.0.0.1:$_port" \
+                        -d "change-header(Next ep $next_ep: cached)" >/dev/null 2>&1
+                    break
+                fi
+                sleep 1
+            done
+        ) >/dev/null 2>&1 &
+        _poller_pid=$!
+    fi
+
+    # fzf in foreground with --listen — stdout captured by $(), display on /dev/tty
+    cmd=$(printf "next\nreplay\nprevious\nselect\nchange_quality\nquit" | \
+        fzf --reverse --cycle --height=50% --border \
+            --listen=127.0.0.1:$_port \
+            --header "$_status" \
+            --prompt "Playing episode $ep_no of $title... ")
+
+    kill "$_poller_pid" 2>/dev/null
+do
     case "$cmd" in
-        next) ep_no=$(printf "%s" "$ep_list" | sed -n "/^${ep_no}$/{n;p;}") 2>/dev/null ;;
-        replay) episode="$replay" ;;
+        next) ep_no=$(printf "%s" "$ep_list" | sed -n "/^${ep_no}$/{n;p;}") 2>/dev/null
+              kill "$prefetch_pid" 2>/dev/null
+              ;;
+        replay) episode="$prefetch_dir/$id/$ep_no.mp4"
+                [ -f "$episode" ] || episode="$replay"
+                ;;
         previous) ep_no=$(printf "%s" "$ep_list" | sed -n "/^${ep_no}$/{g;1!p;};h") 2>/dev/null ;;
         select) ep_no=$(printf "%s" "$ep_list" | nth "Select episode: " "$multi_selection_flag") ;;
         change_quality)
