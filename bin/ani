@@ -90,10 +90,9 @@ die() {
 }
 
 debug_log() {
-    [ "$debug" = 1 ] || return 0
     _msg="$(date '+%H:%M:%S') $*"
-    printf "\33[2K\r\033[36m[debug] %s\033[0m\n" "$_msg"
     echo "$_msg" >> "${TMPDIR:-/tmp}/ani-debug.log"
+    [ "$debug" = 1 ] && printf "\33[2K\r\033[36m[debug] %s\033[0m\n" "$_msg"
 }
 
 help_info() {
@@ -413,8 +412,41 @@ cache_episode() {
     _refr=""
     [ -n "$refr_flag" ] && _refr="-referer ${refr_flag#--referrer=}"
     debug_log "downloading ep $ep_no: ffmpeg -i $episode -> $_ce_file"
-    printf "\33[2K\r\033[34mDownloading episode %s...\033[0m\n" "$ep_no"
-    ffmpeg -loglevel error -stats $_refr -i "$episode" -c copy -movflags +faststart -y "$_ce_file" 2>&1
+    printf "\33[2K\r\033[34mDownloading episode %s...\033[0m" "$ep_no"
+    ffmpeg -loglevel info -progress pipe:1 $_refr -i "$episode" -c copy -movflags +faststart -y "$_ce_file" 2>"${_ce_file}.info" | {
+        _dur_s=""
+        while IFS='=' read -r _key _val; do
+            [ -z "$_dur_s" ] && [ -f "${_ce_file}.info" ] && {
+                _dur_hms=$(sed -n 's/.*Duration: \([0-9:.]*\).*/\1/p' "${_ce_file}.info" | head -1)
+                [ -n "$_dur_hms" ] && {
+                    IFS=':' read -r _h _m _s <<< "$_dur_hms"
+                    _dur_s=$((10#${_h} * 3600 + 10#${_m} * 60 + 10#${_s%%.*}))
+                }
+            }
+            case "$_key" in
+                out_time_ms)
+                    [ -n "$_val" ] && [ "$_val" != "N/A" ] && {
+                        _cur_s=$((${_val%%.*} / 1000000))
+                        if [ "$_dur_s" -gt 0 ] 2>/dev/null; then
+                            _pct=$((_cur_s * 100 / _dur_s))
+                            [ "$_pct" -gt 100 ] && _pct=100
+                            _filled=$((_pct * 30 / 100)) _empty=$((30 - _filled))
+                            printf -v _bar '%*s' "$_filled" ''; _bar="${_bar// /█}"
+                            printf -v _emp '%*s' "$_empty" ''; _bar="${_bar}${_emp// /░}"
+                            printf "\33[2K\r\033[34mDownloading episode %s... [%s] %d%%\033[0m" "$ep_no" "$_bar" "$_pct"
+                        else
+                            _min=$((_cur_s / 60)) _sec=$((_cur_s % 60))
+                            printf "\33[2K\r\033[34mDownloading episode %s... %d:%02d\033[0m" "$ep_no" "$_min" "$_sec"
+                        fi
+                    }
+                    ;;
+                progress) [ "$_val" = "end" ] && break ;;
+            esac
+        done
+        printf "\33[2K\r\033[34mDownloading episode %s... done\033[0m\n" "$ep_no"
+    }
+    rm -f "${_ce_file}.info"
+    touch "$_ce_file.done"
     debug_log "download complete: $_ce_file"
     episode="$_ce_file"
     unset subs_flag refr_flag
@@ -434,7 +466,14 @@ prefetch_episode() {
         _refr=""
         [ -n "$refr_flag" ] && _refr="-referer ${refr_flag#--referrer=}"
         debug_log "prefetch ep $ep_no: ffmpeg -i $episode -> $_pf_file"
-        ffmpeg -loglevel error $_refr -i "$episode" -c copy -movflags +faststart -y "$_pf_file" 2>&1
+        if [ -n "$refr_flag" ]; then
+            _dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 -headers "Referer: ${refr_flag#--referrer=}" -i "$episode" 2>/dev/null)
+        else
+            _dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 -i "$episode" 2>/dev/null)
+        fi
+        [[ "$_dur" =~ ^[0-9] ]] && _dur_s=$(printf "%.0f" "$_dur") && printf "%d" "$_dur_s" > "${_pf_file}.duration"
+        ffmpeg -loglevel warning -progress "${_pf_file}.progress" $_refr -i "$episode" -c copy -movflags +faststart -y "$_pf_file" 2>/dev/null
+        rm -f "${_pf_file}.progress" "${_pf_file}.duration"
         touch "$_pf_file.done"
         debug_log "prefetch ep $ep_no: done (exit=$?)"
     ) &
@@ -969,6 +1008,16 @@ while
                     curl -s -X POST "http://127.0.0.1:$_port" \
                         -d "change-header(Next ep $next_ep: cached)" >/dev/null 2>&1
                     break
+                fi
+                if [ -f "${_pf_file}.progress" ] && [ -f "${_pf_file}.duration" ]; then
+                    _ms=$(sed -n 's/^out_time_ms=//p' "${_pf_file}.progress" | tail -1)
+                    _ds=$(cat "${_pf_file}.duration")
+                    if [ -n "$_ms" ] && [ "$_ms" != "N/A" ] && [ "$_ds" -gt 0 ] 2>/dev/null; then
+                        _pct=$((_ms / 1000000 * 100 / _ds))
+                        [ "$_pct" -gt 100 ] && _pct=100
+                        curl -s -X POST "http://127.0.0.1:$_port" \
+                            -d "change-header(Next ep $next_ep: downloading... ${_pct}%)" >/dev/null 2>&1
+                    fi
                 fi
                 sleep 1
             done
