@@ -91,7 +91,7 @@ die() {
 
 debug_log() {
     _msg="$(date '+%H:%M:%S') $*"
-    echo "$_msg" >> "${TMPDIR:-/tmp}/ani-debug.log"
+    echo "$_msg" >> "$ani_tmp/debug/ani-debug.log"
     if [ "$debug" = 1 ]; then
         printf "\33[2K\r\033[36m[debug] %s\033[0m\n" "$_msg";
     fi
@@ -300,7 +300,7 @@ select_quality() {
 }
 
 decode_tobeparsed() {
-    tmp="$(mktemp)"
+    tmp="$(mktemp "$ani_tmp/cache/decode.XXXXXX")"
     printf '%s' "$1" | base64 -d >"$tmp"
     file_size="$(wc -c <"$tmp")"
     iv="$(dd if="$tmp" bs=1 skip=1 count=12 2>/dev/null | od -A n -t x1 | tr -d ' \n')"
@@ -335,7 +335,7 @@ get_filemoon_links() {
     _kp2_hex="$(b64url_to_hex "$kp2")"
     key_hex="$_kp1_hex$_kp2_hex"
     iv_hex="$(b64url_to_hex "$iv")00000002"
-    tmp="$(mktemp)"
+    tmp="$(mktemp "$ani_tmp/cache/filemoon.XXXXXX")"
     _fm_len=$(printf '%s' "$payload" | wc -c | tr -d ' ')
     _fm_mod=$((_fm_len % 4))
     case $_fm_mod in
@@ -380,7 +380,7 @@ get_episode_url() {
         resp="$(printf "%s" "$api_resp" | tr '{}' '\n' | sed -nE 's|.*sourceUrl":"([^"]*)".*sourceName":"([^"]*)".*|\2 :\1|p' | sed 's|\\u002F|/|g;s|\\/|/|g;s|\\u0026|\&|g;s|\\u003D|=|g;s|\\||g')"
     fi
     # generate links into sequential files
-    cache_dir="$(mktemp -d)"
+    cache_dir="$(mktemp -d "$ani_tmp/cache/providers.XXXXXX")"
     providers="1 2 3 4 5"
     for provider in $providers; do
         generate_link "$provider" >"$cache_dir"/"$provider" &
@@ -558,7 +558,7 @@ fetch_thumbnail() {
 
 migrate_thumbnails() {
     local mig_tmpdir mig_i
-    mig_tmpdir=$(mktemp -d)
+    mig_tmpdir=$(mktemp -d "$ani_tmp/cache/migrate.XXXXXX")
     mig_i=1
     while IFS=$'\t' read -r ep_no id title thumbnail status; do
         (
@@ -579,7 +579,7 @@ migrate_thumbnails() {
 migrate_status() {
     awk -F'\t' 'NF < 5 || $5 == ""' "$histfile" | head -1 | grep -q . || return 0
     local mig_tmpdir mig_i
-    mig_tmpdir=$(mktemp -d)
+    mig_tmpdir=$(mktemp -d "$ani_tmp/cache/migrate.XXXXXX")
     mig_i=1
     while IFS=$'\t' read -r ep_no id title thumbnail status; do
         if [ -n "$status" ]; then
@@ -797,7 +797,9 @@ histfile="$hist_dir/ani-hsts"
 has_image_preview=0
 [ -n "$KITTY_WINDOW_ID" ] && command -v kitty >/dev/null && has_image_preview=1
 search="${ANI_CLI_DEFAULT_SOURCE:-scrape}"
-prefetch_dir="${TMPDIR:-/tmp}/ani-prefetch"
+ani_tmp="${ANI_CLI_TMP_DIR:-${TMPDIR:-/tmp}/ani}"
+mkdir -p "$ani_tmp/cache" "$ani_tmp/debug" "$ani_tmp/prefetch"
+prefetch_dir="$ani_tmp/prefetch"
 prefetch_pid=""
 
 while [ $# -gt 0 ]; do
@@ -903,7 +905,7 @@ case "$search" in
     history)
         migrate_status
         migrate_thumbnails
-        tmpdir=$(mktemp -d)
+        tmpdir=$(mktemp -d "$ani_tmp/cache/history.XXXXXX")
         i=1
         while IFS=$'\t' read -r ep_no id title thumbnail status; do
             ( process_hist_entry > "$tmpdir/$i" ) &
