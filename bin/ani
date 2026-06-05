@@ -92,7 +92,9 @@ die() {
 debug_log() {
     _msg="$(date '+%H:%M:%S') $*"
     echo "$_msg" >> "${TMPDIR:-/tmp}/ani-debug.log"
-    [ "$debug" = 1 ] && printf "\33[2K\r\033[36m[debug] %s\033[0m\n" "$_msg"
+    if [ "$debug" = 1 ]; then
+        printf "\33[2K\r\033[36m[debug] %s\033[0m\n" "$_msg";
+    fi
 }
 
 help_info() {
@@ -726,7 +728,8 @@ play_episode() {
     replay="$episode"
     unset episode
     next_ep=$(printf "%s" "$ep_list" | sed -n "/^${ep_no}$/{n;p;}")
-    [ -n "$next_ep" ] && prefetch_episode "$next_ep"
+    _pf="$prefetch_dir/$id/$mode/$next_ep.mp4"
+    [ -n "$next_ep" ] && [ ! -f "$_pf.done" ] && prefetch_episode "$next_ep"
     update_history
     [ "$use_external_menu" = "1" ] && wait
     [ "$use_external_menu" = "2" ] && wait
