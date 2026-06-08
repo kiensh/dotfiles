@@ -553,7 +553,14 @@ episodes_list() {
 # PLAYING
 
 fetch_thumbnail() {
-    curl -e "$allanime_refr" -s -H "Content-Type: application/json" -X POST "${allanime_api}/api" --data "{\"variables\":{\"showId\":\"$1\"},\"query\":\"query (\$showId: String!) { show( _id: \$showId ) { thumbnail }}\"}" -A "$agent" | sed -nE 's|.*thumbnail":"([^"]*)".*|\1|p' | awk '{if($0 !~ /^http/ && $0 != "") print "https://aln.youtube-anime.com/"$0; else print}'
+    debug_log "fetch_thumbnail: querying showId=$1"
+    local raw
+    raw=$(curl -e "$allanime_refr" -s -H "Content-Type: application/json" -X POST "${allanime_api}/api" --data "{\"variables\":{\"showId\":\"$1\"},\"query\":\"query (\$showId: String!) { show( _id: \$showId ) { thumbnail }}\"}" -A "$agent")
+    debug_log "fetch_thumbnail: raw response for $1: ${raw:0:200}"
+    local thumb
+    thumb=$(printf "%s" "$raw" | sed -nE 's|.*thumbnail":"([^"]*)".*|\1|p' | awk '{if($0 !~ /^http/ && $0 != "") print "https://aln.youtube-anime.com/"$0; else print}')
+    debug_log "fetch_thumbnail: resolved url for $1: '${thumb:-<empty>}'"
+    printf "%s" "$thumb"
 }
 
 migrate_thumbnails() {
@@ -565,7 +572,9 @@ migrate_thumbnails() {
             if [ -n "$thumbnail" ] && curl -sI --max-time 2 -o /dev/null "$thumbnail" 2>/dev/null; then
                 printf "%s\t%s\t%s\t%s\t%s\n" "$ep_no" "$id" "$title" "$thumbnail" "${status:-}"
             else
+                debug_log "migrate_thumbnails: $id thumbnail invalid/missing, re-fetching"
                 thumbnail=$(fetch_thumbnail "$id")
+                debug_log "migrate_thumbnails: $id new thumbnail: '${thumbnail:-<empty>}'"
                 printf "%s\t%s\t%s\t%s\t%s\n" "$ep_no" "$id" "$title" "$thumbnail" "${status:-}"
             fi
         ) > "$mig_tmpdir/$mig_i" &
@@ -946,6 +955,7 @@ case "$search" in
         [ -z "$id" ] && exit 1
         title=$(printf "%s" "$anime_list" | grep "$id" | cut -f2 | sed 's/ - episode.*//')
         thumbnail=$(printf "%s" "$anime_list" | awk -F'\t' -v id="$id" '$1 == id {print $3; exit}')
+        debug_log "history: selected thumbnail for '$title': '${thumbnail:-<empty>}'"
         status=$(printf "%s" "$anime_list" | awk -F'\t' -v id="$id" '$1 == id {print $5; exit}')
         ep_list_full=$(episodes_list "$id") || exit 1
         mode=$(printf "%s" "$ep_list_full" | tail -1)
@@ -976,6 +986,7 @@ case "$search" in
         title=$(printf "%s" "$anime_list" | awk -F'\t' -v id="$id" '$1 == id {print $2; exit}')
         allanime_title="$(printf "%s" "$title" | cut -d'(' -f1 | tr -d '[:punct:]')"
         thumbnail=$(printf "%s" "$anime_list" | awk -F'\t' -v id="$id" '$1 == id {print $3; exit}')
+        debug_log "search: selected thumbnail for '$title': '${thumbnail:-<empty>}'"
         status=$(printf "%s" "$anime_list" | awk -F'\t' -v id="$id" '$1 == id {print $4; exit}')
         ep_list_full=$(episodes_list "$id")
         mode=$(printf "%s" "$ep_list_full" | tail -1)
