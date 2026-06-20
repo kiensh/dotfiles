@@ -54,11 +54,11 @@ nth() {
     if [ -n "$preview_cmd" ]; then
         [ -z "$multi_flag" ] && multi_flag="+m"
         if [ -n "$expect_key" ]; then
-            fzf_raw=$(printf "%s" "$stdin" | awk -F'\t' -v OFS='\t' '{$5=$1" "$3; print}' | launcher "$multi_flag" "--prompt=$prompt" "--delimiter=	" "--with-nth=5" "--nth=5" "--preview=$preview_cmd" "--preview-window=right:25%,border-vertical" "--expect=$expect_key")
+            fzf_raw=$(printf "%s" "$stdin" | awk -F'\t' -v OFS='\t' '{$5=$1" "$3; print}' | launcher "$multi_flag" "--prompt=$prompt" "--delimiter=	" "--with-nth=5" "--nth=1" "--preview=$preview_cmd" "--preview-window=right:25%,border-vertical" "--expect=$expect_key")
             nth_key=$(printf "%s" "$fzf_raw" | head -1)
             line=$(printf "%s" "$fzf_raw" | sed -n '2p' | cut -f1)
         else
-            line=$(printf "%s" "$stdin" | awk -F'\t' -v OFS='\t' '{$5=$1" "$3; print}' | launcher "$multi_flag" "--prompt=$prompt" "--delimiter=	" "--with-nth=5" "--nth=5" "--preview=$preview_cmd" "--preview-window=right:25%,border-vertical" | cut -f1)
+            line=$(printf "%s" "$stdin" | awk -F'\t' -v OFS='\t' '{$5=$1" "$3; print}' | launcher "$multi_flag" "--prompt=$prompt" "--delimiter=	" "--with-nth=5" "--nth=1" "--preview=$preview_cmd" "--preview-window=right:25%,border-vertical" | cut -f1)
         fi
     else
         if [ -n "$expect_key" ]; then
