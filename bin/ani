@@ -397,63 +397,6 @@ get_episode_url() {
     fi
 }
 
-cache_episode() {
-    _ce_dir="$prefetch_dir/$id/$mode"
-    _ce_file="$_ce_dir/$ep_no.mp4"
-    if [ -f "$_ce_file" ] && [ -f "$_ce_file.done" ]; then
-        debug_log "cache hit: $_ce_file"
-        printf "\33[2K\r\033[34mUsing cached episode %s\033[0m\n" "$ep_no"
-        episode="$_ce_file"
-        unset subs_flag refr_flag
-        return 0
-    fi
-    debug_log "cache miss for ep $ep_no, resolving URL"
-    [ -z "$episode" ] && get_episode_url
-    [ -z "$episode" ] && return 1
-    mkdir -p "$_ce_dir"
-    _refr=""
-    [ -n "$refr_flag" ] && _refr="-referer ${refr_flag#--referrer=}"
-    debug_log "downloading ep $ep_no: ffmpeg -i $episode -> $_ce_file"
-    printf "\33[2K\r\033[34mDownloading episode %s...\033[0m" "$ep_no"
-    ffmpeg -loglevel info -progress pipe:1 $_refr -i "$episode" -c copy -movflags +faststart -y "$_ce_file" 2>"${_ce_file}.info" | {
-        _dur_s=""
-        while IFS='=' read -r _key _val; do
-            [ -z "$_dur_s" ] && [ -f "${_ce_file}.info" ] && {
-                _dur_hms=$(sed -n 's/.*Duration: \([0-9:.]*\).*/\1/p' "${_ce_file}.info" | head -1)
-                [ -n "$_dur_hms" ] && {
-                    IFS=':' read -r _h _m _s <<< "$_dur_hms"
-                    _dur_s=$((10#${_h} * 3600 + 10#${_m} * 60 + 10#${_s%%.*}))
-                }
-            }
-            case "$_key" in
-                out_time_ms)
-                    [ -n "$_val" ] && [ "$_val" != "N/A" ] && {
-                        _cur_s=$((${_val%%.*} / 1000000))
-                        if [ "$_dur_s" -gt 0 ] 2>/dev/null; then
-                            _pct=$((_cur_s * 100 / _dur_s))
-                            [ "$_pct" -gt 100 ] && _pct=100
-                            _filled=$((_pct * 30 / 100)) _empty=$((30 - _filled))
-                            printf -v _bar '%*s' "$_filled" ''; _bar="${_bar// /█}"
-                            printf -v _emp '%*s' "$_empty" ''; _bar="${_bar}${_emp// /░}"
-                            printf "\33[2K\r\033[34mDownloading episode %s... [%s] %d%%\033[0m" "$ep_no" "$_bar" "$_pct"
-                        else
-                            _min=$((_cur_s / 60)) _sec=$((_cur_s % 60))
-                            printf "\33[2K\r\033[34mDownloading episode %s... %d:%02d\033[0m" "$ep_no" "$_min" "$_sec"
-                        fi
-                    }
-                    ;;
-                progress) [ "$_val" = "end" ] && break ;;
-            esac
-        done
-        printf "\33[2K\r\033[34mDownloading episode %s... done\033[0m\n" "$ep_no"
-    }
-    rm -f "${_ce_file}.info"
-    touch "$_ce_file.done"
-    debug_log "download complete: $_ce_file"
-    episode="$_ce_file"
-    unset subs_flag refr_flag
-}
-
 prefetch_episode() {
     (
         ep_no=$1
@@ -695,7 +638,23 @@ download() {
 play_episode() {
     [ "$log_episode" = 1 ] && [ "$player_function" != "debug" ] && [ "$player_function" != "download" ] && command -v logger >/dev/null && logger -t ani-cli "${allanime_title}${ep_no}"
     [ "$skip_intro" = 1 ] && skip_flag="$(ani-skip -q "$mal_id" -e "$ep_no")"
-    [ -z "$episode" ] && cache_episode
+    record_flag=""
+    if [ -z "$episode" ]; then
+        _ce_file="$prefetch_dir/$id/$mode/$ep_no.mp4"
+        if [ -f "$_ce_file" ] && [ -f "$_ce_file.done" ]; then
+            debug_log "cache hit: $_ce_file"
+            printf "\33[2K\r\033[34mUsing cached episode %s\033[0m\n" "$ep_no"
+            episode="$_ce_file"
+            unset subs_flag refr_flag
+        else
+            get_episode_url
+            [ -z "$episode" ] && die "Failed to resolve episode URL"
+            mkdir -p "$prefetch_dir/$id/$mode"
+            rm -f "$_ce_file.done"
+            record_flag="--stream-record=$_ce_file"
+            printf "\33[2K\r\033[34mStreaming episode %s (recording to cache)...\033[0m\n" "$ep_no"
+        fi
+    fi
     # shellcheck disable=SC2086
     case "$player_function" in
         debug)
@@ -704,10 +663,16 @@ play_episode() {
             ;;
         mpv*)
             if [ "$no_detach" = 0 ]; then
-                nohup $player_function $skip_flag --force-media-title="${allanime_title}Episode ${ep_no}" "$episode" $subs_flag $refr_flag >/dev/null 2>&1 &
+                nohup $player_function $skip_flag $record_flag --force-media-title="${allanime_title}Episode ${ep_no}" "$episode" $subs_flag $refr_flag >/dev/null 2>&1 &
+                if [ -n "$record_flag" ]; then
+                    _record_pid=$!
+                    ( tail --pid="$_record_pid" -f /dev/null; [ -f "$_ce_file" ] && touch "$_ce_file.done" ) &
+                    disown
+                fi
             else
-                $player_function $skip_flag $subs_flag $refr_flag --force-media-title="${allanime_title}Episode ${ep_no}" "$episode"
+                $player_function $skip_flag $record_flag $subs_flag $refr_flag --force-media-title="${allanime_title}Episode ${ep_no}" "$episode"
                 mpv_exitcode=$?
+                [ -n "$record_flag" ] && [ -f "$_ce_file" ] && touch "$_ce_file.done"
                 [ "$exit_after_play" = 1 ] && [ -z "$range" ] && exit "$mpv_exitcode"
             fi
             ;;
@@ -716,11 +681,17 @@ play_episode() {
         *iina*)
             [ -n "$subs_flag" ] && subs_flag="--mpv-${subs_flag#--}"
             [ -n "$refr_flag" ] && refr_flag="--mpv-${refr_flag#--}"
+            [ -n "$record_flag" ] && record_flag="--mpv-${record_flag#--}"
             if pgrep -f "IINA" >/dev/null 2>&1; then
                 # omit --keep-running when an IINA instance exists to prevent hanging
-                nohup $player_function --no-stdin --mpv-force-media-title="${allanime_title}Episode ${ep_no}" $subs_flag $refr_flag "$episode" >/dev/null 2>&1 &
+                nohup $player_function --no-stdin --mpv-force-media-title="${allanime_title}Episode ${ep_no}" $record_flag $subs_flag $refr_flag "$episode" >/dev/null 2>&1 &
             else
-                nohup $player_function --no-stdin --keep-running --mpv-force-media-title="${allanime_title}Episode ${ep_no}" $subs_flag $refr_flag "$episode" >/dev/null 2>&1 &
+                nohup $player_function --no-stdin --keep-running --mpv-force-media-title="${allanime_title}Episode ${ep_no}" $record_flag $subs_flag $refr_flag "$episode" >/dev/null 2>&1 &
+            fi
+            if [ -n "$record_flag" ]; then
+                _record_pid=$!
+                ( tail --pid="$_record_pid" -f /dev/null; [ -f "$_ce_file" ] && touch "$_ce_file.done" ) &
+                disown
             fi
             ;;
         flatpak_mpv) flatpak run io.mpv.Mpv --force-media-title="${allanime_title}Episode ${ep_no}" "$episode" $subs_flag $refr_flag >/dev/null 2>&1 & ;;
